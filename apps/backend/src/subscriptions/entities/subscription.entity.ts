@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -11,6 +12,7 @@ export enum SubscriptionType {
   YEARLY = 'yearly',
 }
 
+@Entity({ name: 'subscriptions' })
 export class Subscription {
   @PrimaryGeneratedColumn('uuid')
   id: string;

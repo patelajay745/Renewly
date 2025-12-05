@@ -15,13 +15,16 @@ import { ClerkAuthGuard } from 'src/auth/guards/clerkGuard';
 import { Protected } from 'src/decorators/protected.decorator';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import type { User } from '@clerk/backend';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Subscriptions')
 @Controller('subscriptions')
 export class SubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
   @Protected()
   @UseGuards(ClerkAuthGuard)
+  @ApiBody({ type: CreateSubscriptionDto })
   @Post('/')
   create(
     @CurrentUser() user: User,
@@ -43,6 +46,7 @@ export class SubscriptionsController {
   }
   @Protected()
   @UseGuards(ClerkAuthGuard)
+  @ApiBody({ type: UpdateSubscriptionDto })
   @Patch('/:id')
   update(
     @Param('id') id: string,

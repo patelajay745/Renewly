@@ -19,7 +19,7 @@ import { Subscription } from './subscriptions/entities/subscription.entity';
       password: 'supersecretpassword',
       database: 'renewly',
       entities: [Subscription],
-      autoLoadEntities: true,
+      // autoLoadEntities: true,
       synchronize: true,
     }),
     AuthModule,
