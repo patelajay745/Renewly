@@ -35,14 +35,14 @@ export class SubscriptionsController {
   @Protected()
   @UseGuards(ClerkAuthGuard)
   @Get('/')
-  findAll() {
-    return this.subscriptionsService.findAll();
+  findAll(@CurrentUser() user: User) {
+    return this.subscriptionsService.findAll(user);
   }
   @Protected()
   @UseGuards(ClerkAuthGuard)
   @Get('/:id')
-  findOne(@Param('id') id: string) {
-    return this.subscriptionsService.findOne(+id);
+  findOne(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.subscriptionsService.findOne(user, id);
   }
   @Protected()
   @UseGuards(ClerkAuthGuard)
@@ -51,13 +51,14 @@ export class SubscriptionsController {
   update(
     @Param('id') id: string,
     @Body() updateSubscriptionDto: UpdateSubscriptionDto,
+    @CurrentUser() user: User,
   ) {
-    return this.subscriptionsService.update(+id, updateSubscriptionDto);
+    return this.subscriptionsService.update(user, id, updateSubscriptionDto);
   }
   @Protected()
   @UseGuards(ClerkAuthGuard)
   @Delete('/:id')
-  remove(@Param('id') id: string) {
-    return this.subscriptionsService.remove(+id);
+  remove(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.subscriptionsService.remove(user, id);
   }
 }

@@ -17,7 +17,7 @@ export class Subscription {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
+  @Column()
   clerkUserId: string;
 
   @Column()
