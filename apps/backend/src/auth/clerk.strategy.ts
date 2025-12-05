@@ -1,6 +1,6 @@
 import { verifyToken, type ClerkClient, type User } from "@clerk/backend";
 import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
-import type { ConfigService } from "@nestjs/config";
+import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { Request } from "express";
 import { Strategy } from "passport-custom";
