@@ -5,6 +5,10 @@ import { AuthModule } from './auth/auth.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Subscription } from './subscriptions/entities/subscription.entity';
+import { CacheModule } from '@nestjs/cache-manager';
+import Keyv from 'keyv';
+import KeyvRedis from '@keyv/redis';
+import { CacheableMemory } from 'cacheable';
 
 @Module({
   imports: [
@@ -21,6 +25,23 @@ import { Subscription } from './subscriptions/entities/subscription.entity';
       entities: [Subscription],
       // autoLoadEntities: true,
       synchronize: true,
+    }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useFactory: async () => {
+        return {
+          ttl: 60 * 1000,
+          stores: [
+            new Keyv({
+              store: new CacheableMemory({ ttl: 60000, lruSize: 5000 }),
+            }),
+            new Keyv({
+              store: new KeyvRedis(process.env.REDIS_URL),
+              namespace: process.env.REDIS_PREFIX,
+            }),
+          ],
+        };
+      },
     }),
     AuthModule,
     SubscriptionsModule,
