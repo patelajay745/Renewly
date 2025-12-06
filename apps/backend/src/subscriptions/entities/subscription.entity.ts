@@ -36,6 +36,9 @@ export class Subscription {
   category: string;
 
   @CreateDateColumn()
+  startDate: Date;
+
+  @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()

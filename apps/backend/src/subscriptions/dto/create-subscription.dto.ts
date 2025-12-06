@@ -1,12 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
+  IsDate,
   IsEnum,
   IsNotEmpty,
   IsNumber,
   IsString,
 } from 'class-validator';
 import { SubscriptionType } from '../entities/subscription.entity';
+import { Type } from 'class-transformer';
 
 export class CreateSubscriptionDto {
   @ApiProperty({
@@ -50,4 +52,13 @@ export class CreateSubscriptionDto {
   @IsNotEmpty({ message: 'Category is required' })
   @IsString()
   category: string;
+
+  @ApiProperty({
+    example: '2025-01-01',
+    description: 'Start Date of subscription',
+  })
+  @IsNotEmpty({ message: 'Date is required' })
+  @IsDate({ message: 'startDate must be a valid date' })
+  @Type(() => Date)
+  startDate: Date;
 }

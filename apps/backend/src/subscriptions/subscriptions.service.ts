@@ -20,7 +20,7 @@ export class SubscriptionsService {
   ) {}
   async create(user: User, createSubscriptionDto: CreateSubscriptionDto) {
     try {
-      const { title, amount, category, notifications, type } =
+      const { title, amount, category, notifications, type, startDate } =
         createSubscriptionDto;
 
       const subscription = this.subscriptionRepository.save(
@@ -30,6 +30,7 @@ export class SubscriptionsService {
           category,
           notifications,
           type,
+          startDate,
           clerkUserId: user.id,
         }),
       );
@@ -94,7 +95,7 @@ export class SubscriptionsService {
     updateSubscriptionDto: UpdateSubscriptionDto,
   ) {
     try {
-      const { amount, category, notifications, title, type } =
+      const { amount, category, notifications, title, type, startDate } =
         updateSubscriptionDto;
 
       const findforUpdate = await this.subscriptionRepository.findOneBy({
@@ -118,6 +119,7 @@ export class SubscriptionsService {
         notifications,
         title,
         type,
+        startDate,
       });
 
       return updatedSubscription;
