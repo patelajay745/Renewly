@@ -17,14 +17,15 @@ import type { Cache } from 'cache-manager';
 @Injectable()
 export class SubscriptionsService {
   private readonly logger = new Logger(SubscriptionsService.name);
-  private readonly CACHE_INDEX_KEY = 'subscriptions_cache_keys';
+
 
   constructor(
     @InjectRepository(Subscription)
     private subscriptionRepository: Repository<Subscription>,
     @Inject(CACHE_MANAGER)
     private cache: Cache,
-  ) {}
+  ) { }
+  
 
   async create(user: User, createSubscriptionDto: CreateSubscriptionDto) {
     try {
@@ -35,23 +36,9 @@ export class SubscriptionsService {
 
       const saved = await this.subscriptionRepository.save(newSubscription);
 
-      // const subscription = this.subscriptionRepository.save(
-      //   this.subscriptionRepository.create({
-      //     title,
-      //     amount,
-      //     category,
-      //     notifications,
-      //     type,
-      //     startDate,
-      //     clerkUserId: user.id,
-      //   }),
-      // );
-
       if (!saved) {
         throw new HttpException('Something went wrong', 400);
       }
-
-      await this.invalidateUserCachedLists(user.id);
 
       return saved;
     } catch (error) {
@@ -83,7 +70,6 @@ export class SubscriptionsService {
 
     await this.cache.set(cacheKey, subscriptions, 60000);
 
-    await this.addKeyToRegistry(cacheKey);
 
     this.logger.log(`CACHE SET: ${cacheKey}`);
 
@@ -151,7 +137,6 @@ export class SubscriptionsService {
       });
 
       await this.cache.del(`subscription:${id}`);
-      await this.invalidateUserCachedLists(user.id);
 
       return updatedSubscription;
     } catch (error) {
@@ -187,7 +172,6 @@ export class SubscriptionsService {
       });
 
       await this.cache.del(`subscription:${id}`);
-      await this.invalidateUserCachedLists(user.id);
 
       return {
         message: 'Subscription deleted successfully',
@@ -197,30 +181,12 @@ export class SubscriptionsService {
       throw new HttpException(error, 400);
     }
   }
-  private async invalidateUserCachedLists(userId: string) {
-    const keys: string[] = (await this.cache.get(this.CACHE_INDEX_KEY)) || [];
 
-    for (const key of keys) {
-      if (key.includes(`user_${userId}`)) {
-        await this.cache.del(key);
-      }
-    }
-
-    const remaining = keys.filter((k) => !k.includes(`user_${userId}`));
-    await this.cache.set(this.CACHE_INDEX_KEY, remaining);
-  }
-
-  private async addKeyToRegistry(key: string) {
-    const keys: string[] = (await this.cache.get(this.CACHE_INDEX_KEY)) || [];
-
-    if (!keys.includes(key)) {
-      keys.push(key);
-      await this.cache.set(this.CACHE_INDEX_KEY, keys);
-    }
-  }
 
   private generateSubscriptionsKey(userId: string, query?: any): string {
     const key = `subscriptions:user_${userId}:filter_${JSON.stringify(query || {})}`;
     return key;
   }
+
+  
 }
