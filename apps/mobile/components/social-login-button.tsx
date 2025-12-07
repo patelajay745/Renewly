@@ -6,10 +6,12 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useColorScheme,
   View,
 } from "react-native";
 import * as Linking from "expo-linking";
 import React, {useState} from "react";
+import {semanticColors} from "@/constants/theme";
 
 const SocialLoginButton = ({
   strategy,
@@ -26,6 +28,10 @@ const SocialLoginButton = ({
     }
     return "oauth_facebook";
   };
+
+  const colorScheme = useColorScheme();
+
+  const colors = semanticColors[colorScheme ?? "light"];
 
   const {startOAuthFlow} = useOAuth({strategy: getStrategy()});
   const {user} = useUser();
@@ -52,7 +58,13 @@ const SocialLoginButton = ({
     } else if (strategy === "google") {
       return <Ionicons name="logo-google" size={24} color="#DB4437" />;
     } else if (strategy === "apple") {
-      return <Ionicons name="logo-apple" size={24} color="black" />;
+      return (
+        <Ionicons
+          name="logo-apple"
+          size={24}
+          color={colorScheme === "light" ? "dark" : "white"}
+        />
+      );
     }
   };
 
@@ -84,7 +96,7 @@ const SocialLoginButton = ({
 
   return (
     <TouchableOpacity
-      style={[styles.container]}
+      style={[styles.container, {borderColor: colors.border}]}
       onPress={onSocialLoginPress}
       disabled={isLoading}
     >
@@ -93,7 +105,9 @@ const SocialLoginButton = ({
       ) : (
         buttonIcon()
       )}
-      <Text style={styles.buttonText}>{buttonText()}</Text>
+      <Text style={[styles.buttonText, {color: colors.text}]}>
+        {buttonText()}
+      </Text>
       <View />
     </TouchableOpacity>
   );
