@@ -48,7 +48,7 @@ export class SubscriptionsService {
       // );
 
       if (!saved) {
-        throw new HttpException('Subscription already exists', 400);
+        throw new HttpException('Something went wrong', 400);
       }
 
       await this.invalidateUserCachedLists(user.id);
