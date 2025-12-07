@@ -21,7 +21,7 @@ import { CacheableMemory } from 'cacheable';
       port: 5432,
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
-      database: 'renewly',
+      database: process.env.DB_NAME,
       entities: [Subscription],
       // autoLoadEntities: true,
       synchronize: true,
@@ -36,7 +36,7 @@ import { CacheableMemory } from 'cacheable';
               store: new CacheableMemory({ ttl: 60000, lruSize: 5000 }),
             }),
             new Keyv({
-              store: new KeyvRedis(process.env.REDIS_URL),
+              store: new KeyvRedis(`redis://${process.env.REDIS_USERNAME}:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`),
               namespace: process.env.REDIS_PREFIX,
             }),
           ],
@@ -49,4 +49,4 @@ import { CacheableMemory } from 'cacheable';
   controllers: [AppController],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }
