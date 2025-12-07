@@ -14,6 +14,11 @@ export const lightColors = {
     notification: '#FF3B30',
     accent: '#000000',
 
+    // Foreground colors
+    foreground: '#000000',
+    foregroundText: '#FFFFFF',
+    foregroundTextMuted: '#E5E5EA',
+
     // Input colors
     inputBackground: '#F7F7F7',
     inputBorder: '#C7C7CC',
@@ -55,6 +60,11 @@ export const darkColors = {
     borderMuted: '#48484A',
     notification: '#FF453A',
     accent: '#FFFFFF',
+
+    // Foreground colors
+    foreground: '#FFFFFF',
+    foregroundText: '#000000',
+    foregroundTextMuted: '#48484A',
 
     // Input colors
     inputBackground: '#1C1C1E',
@@ -113,6 +123,9 @@ export const semanticColors = {
         border: lightColors.border,
         borderLight: lightColors.borderLight,
         borderMuted: lightColors.borderMuted,
+        foreground: lightColors.foreground,
+        foregroundText: lightColors.foregroundText,
+        foregroundTextMuted: lightColors.foregroundTextMuted,
         inputBackground: lightColors.inputBackground,
         inputBorder: lightColors.inputBorder,
         inputBorderFocused: lightColors.inputBorderFocused,
@@ -141,6 +154,9 @@ export const semanticColors = {
         border: darkColors.border,
         borderLight: darkColors.borderLight,
         borderMuted: darkColors.borderMuted,
+        foreground: darkColors.foreground,
+        foregroundText: darkColors.foregroundText,
+        foregroundTextMuted: darkColors.foregroundTextMuted,
         inputBackground: darkColors.inputBackground,
         inputBorder: darkColors.inputBorder,
         inputBorderFocused: darkColors.inputBorderFocused,
