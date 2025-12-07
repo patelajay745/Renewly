@@ -20,7 +20,7 @@ import { ApiBody, ApiTags } from '@nestjs/swagger';
 @ApiTags('Subscriptions')
 @Controller('subscriptions')
 export class SubscriptionsController {
-  constructor(private readonly subscriptionsService: SubscriptionsService) {}
+  constructor(private readonly subscriptionsService: SubscriptionsService) { }
 
   @Protected()
   @UseGuards(ClerkAuthGuard)
@@ -32,12 +32,14 @@ export class SubscriptionsController {
   ) {
     return this.subscriptionsService.create(user, createSubscriptionDto);
   }
+
   @Protected()
   @UseGuards(ClerkAuthGuard)
   @Get('/')
   findAll(@CurrentUser() user: User) {
     return this.subscriptionsService.findAll(user);
   }
+
   @Protected()
   @UseGuards(ClerkAuthGuard)
   @Get('/:id')

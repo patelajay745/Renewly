@@ -8,7 +8,7 @@ import {
   IsString,
 } from 'class-validator';
 import { SubscriptionType } from '../entities/subscription.entity';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 
 export class CreateSubscriptionDto {
   @ApiProperty({
@@ -24,6 +24,7 @@ export class CreateSubscriptionDto {
     description: 'Subscription amount',
   })
   @IsNotEmpty({ message: 'Amount is required' })
+  @Transform(({ value }) => Number(value))
   @IsNumber()
   amount: number;
 
@@ -43,6 +44,7 @@ export class CreateSubscriptionDto {
   })
   @IsNotEmpty({ message: 'Notifications is required' })
   @IsBoolean({ message: 'Notifications must be a boolean' })
+  @Transform(({ value }) => value === 'true' || value === true || value === 1)
   notifications: boolean;
 
   @ApiProperty({

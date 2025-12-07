@@ -18,17 +18,16 @@ import type { Cache } from 'cache-manager';
 export class SubscriptionsService {
   private readonly logger = new Logger(SubscriptionsService.name);
 
-
   constructor(
     @InjectRepository(Subscription)
     private subscriptionRepository: Repository<Subscription>,
     @Inject(CACHE_MANAGER)
     private cache: Cache,
   ) { }
-  
 
   async create(user: User, createSubscriptionDto: CreateSubscriptionDto) {
     try {
+
       const newSubscription = await this.subscriptionRepository.create({
         ...createSubscriptionDto,
         clerkUserId: user.id,
@@ -69,7 +68,6 @@ export class SubscriptionsService {
       throw new NotFoundException('No subscriptions found');
 
     await this.cache.set(cacheKey, subscriptions, 60000);
-
 
     this.logger.log(`CACHE SET: ${cacheKey}`);
 
@@ -182,11 +180,9 @@ export class SubscriptionsService {
     }
   }
 
-
   private generateSubscriptionsKey(userId: string, query?: any): string {
     const key = `subscriptions:user_${userId}:filter_${JSON.stringify(query || {})}`;
     return key;
   }
 
-  
 }

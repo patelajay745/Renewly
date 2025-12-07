@@ -23,7 +23,7 @@ export class Subscription {
   @Column()
   title: string;
 
-  @Column()
+  @Column({ type: "float" })
   amount: number;
 
   @Column({ type: 'enum', enum: SubscriptionType, default: null })
