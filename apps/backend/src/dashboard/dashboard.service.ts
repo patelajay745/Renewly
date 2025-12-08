@@ -1,6 +1,6 @@
 import { type ClerkClient, User } from '@clerk/backend';
 import { InjectQueue } from '@nestjs/bullmq';
-import { ForbiddenException, Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Queue } from 'bullmq';
 import {
@@ -14,7 +14,6 @@ import type { Cache } from 'cache-manager';
 @Injectable()
 export class DashboardService {
   private readonly logger = new Logger(DashboardService.name);
-  private readonly CACHE_KEY = 'admin:dashboard';
 
   constructor(
     @InjectRepository(Subscription)
@@ -31,29 +30,36 @@ export class DashboardService {
   ) {}
 
   private ensureIsAdmin(user: User) {
-    // If role enforcement needed later:
+    // Uncomment later if needed
     // const role = (user.publicMetadata as any)?.role;
-    // if (role !== 'admin') {
-    //   throw new ForbiddenException('Only admins can access this dashboard');
-    // }
+    // if (role !== 'admin') throw new ForbiddenException("Not allowed");
+  }
+
+  private buildCacheKey(user: User) {
+    const env = process.env.NODE_ENV || 'dev';
+
+    return `dashboard:${env}:admin:${user.id}`;
   }
 
   async getGlobalDashboard(user: User) {
     this.ensureIsAdmin(user);
 
-    const cached = await this.cache.get(this.CACHE_KEY);
+    const cacheKey = this.buildCacheKey(user);
+
+    // ---- 1. Read from cache first
+    const cached = await this.cache.get(cacheKey);
     if (cached) {
-      this.logger.debug(`CACHE HIT: ${this.CACHE_KEY}`);
+      this.logger.debug(`CACHE HIT → ${cacheKey}`);
       return cached;
     }
 
-    this.logger.debug(`CACHE MISS: ${this.CACHE_KEY}`);
+    this.logger.debug(`CACHE MISS → ${cacheKey}`);
 
-    // ---- 1. Fetch Clerk users ----
+    // ---- 2. Fetch Clerk users
     const users = await this.clerkClient.users.getUserList();
     const userList = users.data;
 
-    // ---- 2. Fetch subscriptions grouped ----
+    // ---- 3. Fetch subscription stats with correct alias
     const subscriptions = await this.subscriptionRepository
       .createQueryBuilder('s')
       .select([
@@ -66,7 +72,7 @@ export class DashboardService {
 
     const subscriptionMap = new Map(
       subscriptions.map((item) => [
-        String(item.normalizedId).trim().toLowerCase(),
+        String(item.normalizedId).toLowerCase(),
         {
           subscriptionCount: Number(item.subscriptionCount),
           notifications: Number(item.notifications),
@@ -74,14 +80,11 @@ export class DashboardService {
       ]),
     );
 
-    this.logger.debug(
-      `SubscriptionMap Keys: ${JSON.stringify([...subscriptionMap.keys()])}`,
-    );
-
-    // ---- 3. Combine Clerk user + DB stats ----
+    // ---- 4. Merge Clerk users with DB subscription counts
     const mergedUsers = userList.map((u) => {
-      const normalizedKey = String(u.id).trim().toLowerCase();
-      const subStats = subscriptionMap.get(normalizedKey) || {
+      const lookupKey = String(u.id).toLowerCase();
+
+      const subStats = subscriptionMap.get(lookupKey) || {
         subscriptionCount: 0,
         notifications: 0,
       };
@@ -98,7 +101,7 @@ export class DashboardService {
       };
     });
 
-    // ---- 4. Metrics ----
+    // ---- 5. Metrics logic
     const [
       totalSubscriptions,
       distinctUsersRaw,
@@ -139,7 +142,7 @@ export class DashboardService {
       this.notificationQueue.getFailedCount(),
     ]);
 
-    const response = {
+    const result = {
       stats: {
         totalSubscriptions,
         totalUsersWithSubscriptions: Number(distinctUsersRaw?.count ?? 0),
@@ -155,8 +158,9 @@ export class DashboardService {
       ),
     };
 
-    await this.cache.set(this.CACHE_KEY, response, 30 * 1000);
+    // ---- 6. Store in cache for 30 sec
+    await this.cache.set(cacheKey, result, 30_000);
 
-    return response;
+    return result;
   }
 }
