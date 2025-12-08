@@ -29,24 +29,19 @@ export class DashboardService {
     private readonly cache: Cache,
   ) {}
 
-  private ensureIsAdmin(user: User) {
-    // Uncomment later if needed
-    // const role = (user.publicMetadata as any)?.role;
-    // if (role !== 'admin') throw new ForbiddenException("Not allowed");
+  // ---------- CACHE KEYS (Simple Version) ----------
+  private buildAdminCacheKey(user: User) {
+    return `dashboard:admin:${user.id}`;
   }
 
-  private buildCacheKey(user: User) {
-    const env = process.env.NODE_ENV || 'dev';
-
-    return `dashboard:${env}:admin:${user.id}`;
+  private buildUserCacheKey(user: User) {
+    return `dashboard:user:${user.id}`;
   }
 
+  // ---------- ADMIN DASHBOARD ----------
   async getGlobalDashboard(user: User) {
-    this.ensureIsAdmin(user);
+    const cacheKey = this.buildAdminCacheKey(user);
 
-    const cacheKey = this.buildCacheKey(user);
-
-    // ---- 1. Read from cache first
     const cached = await this.cache.get(cacheKey);
     if (cached) {
       this.logger.debug(`CACHE HIT → ${cacheKey}`);
@@ -55,11 +50,9 @@ export class DashboardService {
 
     this.logger.debug(`CACHE MISS → ${cacheKey}`);
 
-    // ---- 2. Fetch Clerk users
     const users = await this.clerkClient.users.getUserList();
     const userList = users.data;
 
-    // ---- 3. Fetch subscription stats with correct alias
     const subscriptions = await this.subscriptionRepository
       .createQueryBuilder('s')
       .select([
@@ -80,10 +73,8 @@ export class DashboardService {
       ]),
     );
 
-    // ---- 4. Merge Clerk users with DB subscription counts
     const mergedUsers = userList.map((u) => {
       const lookupKey = String(u.id).toLowerCase();
-
       const subStats = subscriptionMap.get(lookupKey) || {
         subscriptionCount: 0,
         notifications: 0,
@@ -101,7 +92,6 @@ export class DashboardService {
       };
     });
 
-    // ---- 5. Metrics logic
     const [
       totalSubscriptions,
       distinctUsersRaw,
@@ -158,8 +148,97 @@ export class DashboardService {
       ),
     };
 
-    // ---- 6. Store in cache for 30 sec
-    await this.cache.set(cacheKey, result, 30_000);
+    await this.cache.set(cacheKey, result, 60_000); // 60 sec cache
+
+    return result;
+  }
+
+  // ---------- HELPER: Calculate next renewal ----------
+  private calculateNextRenewalDate(s: Subscription) {
+    const startDate = new Date(s.startDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let nextRenewal = new Date(startDate);
+
+    if (s.type === 'weekly')
+      while (nextRenewal <= today)
+        nextRenewal.setDate(nextRenewal.getDate() + 7);
+
+    if (s.type === 'monthly')
+      while (nextRenewal <= today)
+        nextRenewal.setMonth(nextRenewal.getMonth() + 1);
+
+    if (s.type === 'yearly')
+      while (nextRenewal <= today)
+        nextRenewal.setFullYear(nextRenewal.getFullYear() + 1);
+
+    return nextRenewal;
+  }
+
+  // ---------- USER DASHBOARD ----------
+  async getUserDashboard(user: User) {
+    const cacheKey = this.buildUserCacheKey(user);
+
+    const cached = await this.cache.get(cacheKey);
+    if (cached) {
+      this.logger.debug(`USER CACHE HIT → ${cacheKey}`);
+      return cached;
+    }
+
+    this.logger.debug(`USER CACHE MISS → ${cacheKey}`);
+
+    const subscriptions = await this.subscriptionRepository.find({
+      where: { clerkUserId: user.id },
+      order: { createdAt: 'DESC' },
+    });
+
+    const totalSubscriptions = subscriptions.length;
+
+    const totalWeeklySpend = subscriptions
+      .filter((s) => s.type === SubscriptionType.WEEKLY)
+      .reduce((sum, s) => sum + s.amount, 0);
+
+    const totalMonthlySpend = subscriptions
+      .filter((s) => s.type === SubscriptionType.MONTHLY)
+      .reduce((sum, s) => sum + s.amount, 0);
+
+    const totalYearlySpend = subscriptions
+      .filter((s) => s.type === SubscriptionType.YEARLY)
+      .reduce((sum, s) => sum + s.amount, 0);
+
+    const notificationsEnabledCount = subscriptions.filter(
+      (s) => s.notifications === true,
+    ).length;
+    const expoTokenRegistered = subscriptions.some((s) => s.expoToken);
+
+    const nextPayments = subscriptions
+      .map((s) => ({
+        id: s.id,
+        title: s.title,
+        amount: s.amount,
+        type: s.type,
+        nextPayment: this.calculateNextRenewalDate(s),
+      }))
+      .sort((a, b) => a.nextPayment.getTime() - b.nextPayment.getTime())
+      .slice(0, 5);
+
+    const result = {
+      stats: {
+        totalSubscriptions,
+        totalWeeklySpend,
+        totalMonthlySpend,
+        totalYearlySpend,
+        totalYearlyProjection:
+          totalWeeklySpend * 52 + totalMonthlySpend * 12 + totalYearlySpend,
+        notificationsEnabledCount,
+        expoTokenRegistered,
+      },
+      nextPayments,
+      recentSubscriptions: subscriptions.slice(0, 5),
+    };
+
+    await this.cache.set(cacheKey, result, 60_000);
 
     return result;
   }

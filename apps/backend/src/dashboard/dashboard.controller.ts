@@ -17,4 +17,11 @@ export class DashboardController {
   getGlobalDashboard(@CurrentUser() user: User) {
     return this.dashboardService.getGlobalDashboard(user);
   }
+
+  @Protected()
+  @UseGuards(ClerkAuthGuard)
+  @Get('/me')
+  getUserDashboard(@CurrentUser() user: User) {
+    return this.dashboardService.getUserDashboard(user);
+  }
 }
