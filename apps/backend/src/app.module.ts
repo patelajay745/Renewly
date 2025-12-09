@@ -12,6 +12,7 @@ import { CacheableMemory } from 'cacheable';
 import { NotificationModule } from './notification/notification.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { BullModule } from '@nestjs/bullmq';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -67,7 +68,8 @@ import { BullModule } from '@nestjs/bullmq';
     SubscriptionsModule,
     ScheduleModule.forRoot({
     }),
-    NotificationModule
+    NotificationModule,
+    DashboardModule
   ],
   controllers: [AppController],
   providers: [],
