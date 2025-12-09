@@ -20,7 +20,7 @@ export class DashboardController {
 
   @Protected()
   @UseGuards(ClerkAuthGuard)
-  @Get('/me')
+  @Get('/')
   getUserDashboard(@CurrentUser() user: User) {
     return this.dashboardService.getUserDashboard(user);
   }
