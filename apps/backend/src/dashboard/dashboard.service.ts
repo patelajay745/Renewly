@@ -29,18 +29,9 @@ export class DashboardService {
     private readonly cache: Cache,
   ) {}
 
-  // ---------- CACHE KEYS (Simple Version) ----------
-  private buildAdminCacheKey(user: User) {
-    return `dashboard:admin:${user.id}`;
-  }
-
-  private buildUserCacheKey(user: User) {
-    return `dashboard:user:${user.id}`;
-  }
-
   // ---------- ADMIN DASHBOARD ----------
   async getGlobalDashboard(user: User) {
-    const cacheKey = this.buildAdminCacheKey(user);
+    const cacheKey = `dashboard:admin:${user.id}`;
 
     const cached = await this.cache.get(cacheKey);
     if (cached) {
@@ -178,7 +169,7 @@ export class DashboardService {
 
   // ---------- USER DASHBOARD ----------
   async getUserDashboard(user: User) {
-    const cacheKey = this.buildUserCacheKey(user);
+    const cacheKey = `dashboard:user:${user.id}`;
 
     const cached = await this.cache.get(cacheKey);
     if (cached) {
