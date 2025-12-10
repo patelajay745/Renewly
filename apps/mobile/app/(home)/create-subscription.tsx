@@ -17,6 +17,7 @@ import {Controller, useForm} from "react-hook-form";
 import {subscriptionSchema} from "@/schemas/create-subscription";
 import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
+import DatePicker from "@/components/date-picker";
 
 interface Props {}
 
@@ -24,6 +25,7 @@ type SubscriptionFormData = z.infer<typeof subscriptionSchema>;
 
 const CreateSubscription: FC<Props> = (props) => {
   const [expoPushToken, setExpoPushToken] = useState<string>("");
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const colorScheme = useColorScheme();
   const colors = semanticColors[colorScheme ?? "light"];
 
@@ -198,6 +200,25 @@ const CreateSubscription: FC<Props> = (props) => {
                     selectedValue={value}
                     onValueChange={onChange}
                     placeholder="Select Category"
+                  />
+                )}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputText}>Start Date</Text>
+
+              <Controller
+                control={control}
+                name="startDate"
+                render={({field: {onChange, onBlur, value}}) => (
+                  <DatePicker
+                    placeholder="Choose a date"
+                    value={selectedDate}
+                    onChange={(date) => {
+                      setSelectedDate(date);
+                      onChange(date ? date.toISOString().split("T")[0] : "");
+                    }}
                   />
                 )}
               />
