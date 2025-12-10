@@ -6,44 +6,50 @@ import StatsCard from "@/components/stateCard";
 import { useGetDashboardStats } from "@/hooks/api/use-dashboard";
 import { useAppTheme } from "@/providers/ThemeProvider";
 import { useUser } from "@clerk/clerk-expo";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 
 export default function Page() {
   const { colors } = useAppTheme();
   const { user } = useUser();
   const { data, isLoading } = useGetDashboardStats();
 
-  if (isLoading) return <Text style={[styles.loadingText, { color: colors.text }]}>Loading...</Text>;
+  if (isLoading)
+    return (
+      <Text style={[styles.loadingText, { color: colors.text }]}>
+        Loading...
+      </Text>
+    );
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header showHeaderContent={false} />
 
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <Text style={[styles.heading, { color: colors.text }]}>
-          Stats of {user?.firstName}
-        </Text>
+      <FlatList
+        data={[1]}
+        renderItem={() => (
+          <>
+            <Text style={[styles.heading, { color: colors.text }]}>
+              Welcome, {user?.firstName}
+            </Text>
 
-        {data && <StatsCard data={data} />}
-        {data && <NextPayments data={data} />}
-        {data && <RecentSubscriptions data={data} />}
-      </ScrollView>
+            {data && <StatsCard data={data} />}
+            {data && <NextPayments data={data.nextPayments} />}
+            {data && <RecentSubscriptions data={data.recentSubscriptions} />}
+          </>
+        )}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
-  },
-  scroll: {
-    paddingHorizontal: 16,
+    flex: 1,
   },
   scrollContent: {
+    paddingHorizontal: 16,
     paddingBottom: 80,
   },
   heading: {
