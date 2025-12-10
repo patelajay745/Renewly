@@ -83,6 +83,7 @@ const DatePicker: FC<Props> = ({
     value
   );
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
+
   const colorScheme = useColorScheme();
   const colors = semanticColors[colorScheme ?? "light"];
 
@@ -101,6 +102,14 @@ const DatePicker: FC<Props> = ({
     }).start();
   };
 
+  const formatDate = (date: Date | undefined) => {
+    if (!date) return placeholder;
+    const month = MONTHS[date.getMonth()];
+    const day = date.getDate();
+    const year = date.getFullYear();
+    return `${month} ${day}, ${year}`;
+  };
+
   const closePicker = () => {
     Animated.timing(slideAnim, {
       toValue: screenHeight,
@@ -110,28 +119,6 @@ const DatePicker: FC<Props> = ({
     }).start(() => {
       setIsVisible(false);
     });
-  };
-
-  const handleSelect = () => {
-    onChange?.(tempSelectedDate);
-    Animated.timing(slideAnim, {
-      toValue: screenHeight,
-      duration: 250,
-      useNativeDriver: true,
-      easing: Easing.out(Easing.cubic),
-    }).start(() => setIsVisible(false));
-  };
-
-  const handleOpenPicker = () => {
-    openPicker();
-  };
-
-  const getDaysInMonth = (year: number, month: number) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
-
-  const getFirstDayOfMonth = (year: number, month: number) => {
-    return new Date(year, month, 1).getDay();
   };
 
   const handlePrevMonth = () => {
@@ -168,72 +155,26 @@ const DatePicker: FC<Props> = ({
     setShowYearPicker(false);
   };
 
-  const handleDateSelect = (day: number) => {
-    const newDate = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      day
-    );
-
-    if (minimumDate && newDate < minimumDate) return;
-    if (maximumDate && newDate > maximumDate) return;
-
-    setTempSelectedDate(newDate);
-  };
-
-  const isDateDisabled = (day: number) => {
-    const date = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      day
-    );
-    if (minimumDate && date < minimumDate) return true;
-    if (maximumDate && date > maximumDate) return true;
-    return false;
-  };
-
-  const isDateSelected = (day: number) => {
-    if (!tempSelectedDate) return false;
-    const date = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      day
-    );
-    return (
-      date.getDate() === tempSelectedDate.getDate() &&
-      date.getMonth() === tempSelectedDate.getMonth() &&
-      date.getFullYear() === tempSelectedDate.getFullYear()
-    );
-  };
-
-  const formatDate = (date: Date | undefined) => {
-    if (!date) return placeholder;
-    const month = MONTHS[date.getMonth()];
-    const day = date.getDate();
-    const year = date.getFullYear();
-    return `${month} ${day}, ${year}`;
-  };
-
   const renderCalendar = () => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    const daysInMonth = getDaysInMonth(year, month);
-    const firstDay = getFirstDayOfMonth(year, month);
+    const daysInMonth = getDayInMonth(year, month);
+    const firstDay = getFirstMonthOfMonth(year, month);
 
     const days = [];
-    // Empty cells for days before month starts
+
     for (let i = 0; i < firstDay; i++) {
       days.push(
-        <View key={`empty-${i}`} style={styles.dayCell}>
+        <View style={styles.dayCell} key={`empty-${i}`}>
           <View style={styles.dayButton} />
         </View>
       );
     }
 
-    // Actual days
     for (let day = 1; day <= daysInMonth; day++) {
       const disabled = isDateDisabled(day);
       const selected = isDateSelected(day);
+
       days.push(
         <View key={`day-${day}`} style={styles.dayCell}>
           <TouchableOpacity
@@ -259,15 +200,71 @@ const DatePicker: FC<Props> = ({
         </View>
       );
     }
-
     return days;
+  };
+
+  const handleDateSelect = (day: number) => {
+    const newDate = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      day
+    );
+
+    if (minimumDate && newDate < minimumDate) return;
+    if (maximumDate && newDate > maximumDate) return;
+
+    setTempSelectedDate(newDate);
+  };
+
+  const isDateDisabled = (day: number) => {
+    const date = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      day
+    );
+    if (minimumDate && date < minimumDate) return true;
+    if (maximumDate && date > maximumDate) return true;
+
+    return false;
+  };
+
+  const isDateSelected = (day: number) => {
+    if (!tempSelectedDate) return false;
+    const date = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      day
+    );
+
+    return (
+      date.getDate() === tempSelectedDate.getDate() &&
+      date.getMonth() === tempSelectedDate.getMonth() &&
+      date.getFullYear() === tempSelectedDate.getFullYear()
+    );
+  };
+
+  const getDayInMonth = (year: number, month: number) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+  const getFirstMonthOfMonth = (year: number, month: number) => {
+    return new Date(year, month, 1).getDay();
+  };
+
+  const handleSelect = () => {
+    onChange?.(tempSelectedDate);
+    Animated.timing(slideAnim, {
+      toValue: screenHeight,
+      duration: 250,
+      useNativeDriver: true,
+      easing: Easing.out(Easing.cubic),
+    }).start(() => setIsVisible(false));
   };
 
   return (
     <>
       <TouchableOpacity
         disabled={disabled}
-        onPress={handleOpenPicker}
+        onPress={openPicker}
         style={[
           styles.pickerButton,
           {
@@ -301,6 +298,7 @@ const DatePicker: FC<Props> = ({
             onPress={closePicker}
             activeOpacity={1}
           />
+
           <Animated.View
             style={[
               styles.pickerContainer,
@@ -322,7 +320,6 @@ const DatePicker: FC<Props> = ({
             </View>
 
             <View style={styles.calendarContainer}>
-              {/* Month/Year selector */}
               <View style={styles.monthYearSelector}>
                 <TouchableOpacity
                   onPress={handlePrevMonth}
@@ -331,10 +328,10 @@ const DatePicker: FC<Props> = ({
                   <ChevronLeft size={24} color={colors.text} />
                 </TouchableOpacity>
 
-                <View style={styles.monthYearButtons}>
+                <View style={styles.monthYearButton}>
                   <TouchableOpacity
-                    onPress={() => setShowMonthPicker(!showMonthPicker)}
                     style={styles.monthYearButton}
+                    onPress={() => setShowMonthPicker(!showMonthPicker)}
                   >
                     <Text style={[styles.monthYearText, {color: colors.text}]}>
                       {MONTHS[currentDate.getMonth()]}
@@ -342,8 +339,8 @@ const DatePicker: FC<Props> = ({
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    onPress={() => setShowYearPicker(!showYearPicker)}
                     style={styles.monthYearButton}
+                    onPress={() => setShowYearPicker(!showYearPicker)}
                   >
                     <Text style={[styles.monthYearText, {color: colors.text}]}>
                       {currentDate.getFullYear()}
@@ -359,17 +356,16 @@ const DatePicker: FC<Props> = ({
                 </TouchableOpacity>
               </View>
 
-              {/* Month Picker */}
               {showMonthPicker && (
                 <ScrollView style={styles.pickerScrollView}>
                   <View style={styles.monthGrid}>
                     {MONTHS.map((month, index) => (
                       <TouchableOpacity
-                        key={month}
+                        key={index}
                         style={[
                           styles.monthItem,
                           currentDate.getMonth() === index && {
-                            backgroundColor: `${colors.primary}15`,
+                            backgroundColor: `${colors.primary}20`,
                           },
                         ]}
                         onPress={() => handleMonthSelect(index)}
@@ -391,17 +387,16 @@ const DatePicker: FC<Props> = ({
                 </ScrollView>
               )}
 
-              {/* Year Picker */}
               {showYearPicker && (
                 <ScrollView style={styles.pickerScrollView}>
                   <View style={styles.yearGrid}>
-                    {YEARS.map((year) => (
+                    {YEARS.map((year, index) => (
                       <TouchableOpacity
-                        key={year}
+                        key={index}
                         style={[
                           styles.yearItem,
                           currentDate.getFullYear() === year && {
-                            backgroundColor: `${colors.primary}15`,
+                            backgroundColor: `${colors.primary}20`,
                           },
                         ]}
                         onPress={() => handleYearSelect(year)}
@@ -423,7 +418,6 @@ const DatePicker: FC<Props> = ({
                 </ScrollView>
               )}
 
-              {/* Calendar Grid */}
               {!showMonthPicker && !showYearPicker && (
                 <>
                   <View style={styles.weekDaysContainer}>
@@ -468,15 +462,7 @@ const DatePicker: FC<Props> = ({
                 onPress={handleSelect}
                 style={[styles.button, {backgroundColor: colors.primary}]}
               >
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color: colors.foregroundText,
-                    fontWeight: "500",
-                  }}
-                >
-                  Select
-                </Text>
+                <Text>Select</Text>
               </TouchableOpacity>
             </View>
           </Animated.View>
@@ -533,17 +519,13 @@ const styles = StyleSheet.create({
   navButton: {
     padding: 8,
   },
-  monthYearButtons: {
+  monthYearButton: {
     flexDirection: "row",
     gap: 12,
   },
-  monthYearButton: {
+  monthYearText: {
     paddingVertical: 8,
     paddingHorizontal: 16,
-  },
-  monthYearText: {
-    fontSize: 16,
-    fontWeight: "600",
   },
   pickerScrollView: {
     maxHeight: 300,

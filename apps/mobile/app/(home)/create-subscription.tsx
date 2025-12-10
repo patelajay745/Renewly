@@ -116,7 +116,7 @@ const CreateSubscription: FC<Props> = (props) => {
     return token;
   }
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {backgroundColor: colors.background}]}>
       <Header showHeaderContent={false} />
 
       <FlatList
@@ -124,7 +124,9 @@ const CreateSubscription: FC<Props> = (props) => {
         renderItem={() => (
           <View style={styles.inputView}>
             <View style={styles.inputContainer}>
-              <Text style={styles.inputText}>Title</Text>
+              <Text style={[styles.inputText, {color: colors.text}]}>
+                Title
+              </Text>
 
               <Controller
                 control={control}
@@ -138,6 +140,7 @@ const CreateSubscription: FC<Props> = (props) => {
                         backgroundColor: colors.inputBackground,
                         borderColor: colors.inputBorder,
                       },
+                      {color: colors.text},
                     ]}
                     onBlur={onBlur}
                     onChangeText={onChange}
@@ -148,7 +151,9 @@ const CreateSubscription: FC<Props> = (props) => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.inputText}>Amount</Text>
+              <Text style={[styles.inputText, {color: colors.text}]}>
+                Amount
+              </Text>
               <Controller
                 control={control}
                 name="amount"
@@ -161,6 +166,7 @@ const CreateSubscription: FC<Props> = (props) => {
                         backgroundColor: colors.inputBackground,
                         borderColor: colors.inputBorder,
                       },
+                      {color: colors.text},
                     ]}
                     onBlur={onBlur}
                     onChangeText={onChange}
@@ -172,7 +178,7 @@ const CreateSubscription: FC<Props> = (props) => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.inputText}>Type</Text>
+              <Text style={[styles.inputText, {color: colors.text}]}>Type</Text>
 
               <Controller
                 control={control}
@@ -189,7 +195,9 @@ const CreateSubscription: FC<Props> = (props) => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.inputText}>Category</Text>
+              <Text style={[styles.inputText, {color: colors.text}]}>
+                Category
+              </Text>
 
               <Controller
                 control={control}
@@ -206,7 +214,9 @@ const CreateSubscription: FC<Props> = (props) => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.inputText}>Start Date</Text>
+              <Text style={[styles.inputText, {color: colors.text}]}>
+                Start Date
+              </Text>
 
               <Controller
                 control={control}
@@ -226,7 +236,10 @@ const CreateSubscription: FC<Props> = (props) => {
           </View>
         )}
         ListHeaderComponent={() => (
-          <Text style={styles.screenTitle}> Create Subscription</Text>
+          <Text style={[styles.screenTitle, {color: colors.text}]}>
+            {" "}
+            Create Subscription
+          </Text>
         )}
         contentContainerStyle={{paddingHorizontal: 10, marginTop: 20}}
         ListHeaderComponentStyle={{marginBottom: 20}}

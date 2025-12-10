@@ -3,32 +3,30 @@ import NextPayments from "@/components/nextPayments";
 import RecentSubscriptions from "@/components/recentSubscriptions";
 import StatsCard from "@/components/stateCard";
 
-import { useGetDashboardStats } from "@/hooks/api/use-dashboard";
-import { useAppTheme } from "@/providers/ThemeProvider";
-import { useUser } from "@clerk/clerk-expo";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import {useGetDashboardStats} from "@/hooks/api/use-dashboard";
+import {useAppTheme} from "@/providers/ThemeProvider";
+import {useUser} from "@clerk/clerk-expo";
+import {FlatList, StyleSheet, Text, View} from "react-native";
 
 export default function Page() {
-  const { colors } = useAppTheme();
-  const { user } = useUser();
-  const { data, isLoading } = useGetDashboardStats();
+  const {colors} = useAppTheme();
+  const {user} = useUser();
+  // const { data, isLoading } = useGetDashboardStats();
 
-  if (isLoading)
-    return (
-      <Text style={[styles.loadingText, { color: colors.text }]}>
-        Loading...
-      </Text>
-    );
+  // if (isLoading)
+  //   return (
+  //     <Text style={[styles.loadingText, {color: colors.text}]}>Loading...</Text>
+  //   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, {backgroundColor: colors.background}]}>
       <Header showHeaderContent={false} />
 
-      <FlatList
+      {/* <FlatList
         data={[1]}
         renderItem={() => (
           <>
-            <Text style={[styles.heading, { color: colors.text }]}>
+            <Text style={[styles.heading, {color: colors.text}]}>
               Welcome, {user?.firstName}
             </Text>
 
@@ -39,7 +37,7 @@ export default function Page() {
         )}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
-      />
+      /> */}
     </View>
   );
 }

@@ -88,10 +88,10 @@ const CustomPicker: FC<Props> = ({
         ]}
         onPress={openPicker}
       >
-        <Text style={styles.pickerButtonText}>
+        <Text style={[styles.pickerButtonText, {color: colors.text}]}>
           {selectedOption ? selectedOption.label : placeholder}
         </Text>
-        <ChevronDown size={20} />
+        <ChevronDown size={20} color={colors.text} />
       </TouchableOpacity>
 
       <Modal
@@ -110,6 +110,11 @@ const CustomPicker: FC<Props> = ({
             style={[
               styles.pickerContainer,
               {transform: [{translateY: slideAnim}]},
+              {
+                backgroundColor: colors.surface,
+                borderWidth: 1,
+                borderColor: `${colors.foreground}40`,
+              },
             ]}
           >
             <View
@@ -171,16 +176,26 @@ const CustomPicker: FC<Props> = ({
                 onPress={closePicker}
               >
                 <Text
-                  style={{fontSize: 16, color: colors.text, fontWeight: 500}}
+                  style={{
+                    fontSize: 16,
+                    color: colors.foreground,
+                    fontWeight: 500,
+                  }}
                 >
                   Cancel
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleSelect}
-                style={[styles.button, {backgroundColor: colors.primary}]}
+                style={[styles.button, {backgroundColor: colors.foreground}]}
               >
-                <Text style={{fontSize: 16, color: "white", fontWeight: 500}}>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    color: colors.background,
+                    fontWeight: 500,
+                  }}
+                >
                   Select
                 </Text>
               </TouchableOpacity>
