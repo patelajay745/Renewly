@@ -1,43 +1,59 @@
-import {SignedIn, SignedOut, useAuth, useUser} from "@clerk/clerk-expo";
-import {Link, Redirect} from "expo-router";
-import {StyleSheet, Text, View} from "react-native";
-import {SignOutButton} from "@/components/sign-out-button";
 import Header from "@/components/header";
+import NextPayments from "@/components/nextPayments";
+import RecentSubscriptions from "@/components/recentSubscriptions";
+import StatsCard from "@/components/stateCard";
+
+import { useGetDashboardStats } from "@/hooks/api/use-dashboard";
+import { useAppTheme } from "@/providers/ThemeProvider";
+import { useUser } from "@clerk/clerk-expo";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function Page() {
-  const {user} = useUser();
-  const {isSignedIn} = useUser();
-  const {getToken} = useAuth();
+  const { colors } = useAppTheme();
+  const { user } = useUser();
+  const { data, isLoading } = useGetDashboardStats();
 
-  if (!isSignedIn) return <Redirect href={"/sign-in"} />;
-
-  // (async () => {
-  //   const token = await getToken({template: "aj"});
-  //   console.log("User Token: from home/index.tsx", token);
-  // })();
+  if (isLoading) return <Text style={[styles.loadingText, { color: colors.text }]}>Loading...</Text>;
 
   return (
-    <View style={{flex: 1}}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header showHeaderContent={false} />
-      <View style={styles.container}>
-        <SignedIn>
-          <Text>Hello {user?.emailAddresses[0].emailAddress}</Text>
-          <SignOutButton />
-        </SignedIn>
-        <SignedOut>
-          <Link href="/(auth)/sign-in">
-            <Text>Sign in</Text>
-          </Link>
-        </SignedOut>
-      </View>
+
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={[styles.heading, { color: colors.text }]}>
+          Stats of {user?.firstName}
+        </Text>
+
+        {data && <StatsCard data={data} />}
+        {data && <NextPayments data={data} />}
+        {data && <RecentSubscriptions data={data} />}
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    paddingVertical: 10,
-    marginHorizontal: 10,
+    flex: 1
+  },
+  scroll: {
+    paddingHorizontal: 16,
+  },
+  scrollContent: {
+    paddingBottom: 80,
+  },
+  heading: {
+    fontSize: 20,
+    fontWeight: "600",
+    marginVertical: 10,
+  },
+  loadingText: {
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 40,
   },
 });
