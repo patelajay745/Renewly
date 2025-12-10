@@ -1,35 +1,45 @@
-import {SignedIn, SignedOut, useAuth, useUser} from "@clerk/clerk-expo";
-import {Link, Redirect} from "expo-router";
-import {StyleSheet, Text, View} from "react-native";
-import {SignOutButton} from "@/components/sign-out-button";
 import Header from "@/components/header";
+import NextPayments from "@/components/nextPayments";
+import RecentSubscriptions from "@/components/recentSubscriptions";
+import StatsCard from "@/components/stateCard";
+
+import { useGetDashboardStats } from "@/hooks/api/use-dashboard";
+import { useAppTheme } from "@/providers/ThemeProvider";
+import { useUser } from "@clerk/clerk-expo";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 
 export default function Page() {
-  const {user} = useUser();
-  const {isSignedIn} = useUser();
-  const {getToken} = useAuth();
+  const { colors } = useAppTheme();
+  const { user } = useUser();
+  const { data, isLoading } = useGetDashboardStats();
 
-  if (!isSignedIn) return <Redirect href={"/sign-in"} />;
-
-  // (async () => {
-  //   const token = await getToken({template: "aj"});
-  //   console.log("User Token: from home/index.tsx", token);
-  // })();
+  if (isLoading)
+    return (
+      <Text style={[styles.loadingText, { color: colors.text }]}>
+        Loading...
+      </Text>
+    );
 
   return (
-    <View style={{flex: 1}}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Header showHeaderContent={false} />
-      <View style={styles.container}>
-        <SignedIn>
-          <Text>Hello {user?.emailAddresses[0].emailAddress}</Text>
-          <SignOutButton />
-        </SignedIn>
-        <SignedOut>
-          <Link href="/(auth)/sign-in">
-            <Text>Sign in</Text>
-          </Link>
-        </SignedOut>
-      </View>
+
+      <FlatList
+        data={[1]}
+        renderItem={() => (
+          <>
+            <Text style={[styles.heading, { color: colors.text }]}>
+              Welcome, {user?.firstName}
+            </Text>
+
+            {data && <StatsCard data={data} />}
+            {data && <NextPayments data={data.nextPayments} />}
+            {data && <RecentSubscriptions data={data.recentSubscriptions} />}
+          </>
+        )}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      />
     </View>
   );
 }
@@ -37,7 +47,19 @@ export default function Page() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingVertical: 10,
-    marginHorizontal: 10,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 80,
+  },
+  heading: {
+    fontSize: 20,
+    fontWeight: "600",
+    marginVertical: 10,
+  },
+  loadingText: {
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 40,
   },
 });

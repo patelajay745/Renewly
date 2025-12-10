@@ -5,11 +5,4 @@ import { ClerkAuthGuard } from './guards/clerkGuard';
 import type { User } from '@clerk/backend';
 
 @Controller('auth')
-export class AuthController {
-  @Get('/me')
-  @Protected()
-  @UseGuards(ClerkAuthGuard)
-  async getProfile(@CurrentUser() user: User) {
-    return user;
-  }
-}
+export class AuthController {}

@@ -1,5 +1,5 @@
-import {Tabs} from "expo-router";
-import {NativeTabs, Icon, Label} from "expo-router/unstable-native-tabs";
+import { Tabs } from "expo-router";
+import { NativeTabs, Icon, Label } from "expo-router/unstable-native-tabs";
 import {
   Home,
   HomeIcon,
@@ -9,30 +9,36 @@ import {
   Settings,
   Settings2,
 } from "lucide-react-native";
-import {ComponentProps, Ref} from "react";
-import {TabTriggerSlotProps} from "expo-router/ui";
-import {Pressable, Text, View} from "react-native";
+import { ComponentProps, Ref } from "react";
+import { TabTriggerSlotProps } from "expo-router/ui";
+import { Pressable, Text, View } from "react-native";
+import { useAppTheme } from "@/providers/ThemeProvider";
 
 export default function Layout() {
+  const { colors } = useAppTheme();
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
+        tabBarStyle: {
+          backgroundColor: colors.card,
+          borderTopColor: colors.borderLight,
+        },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({focused}) => <TabItem icon={HomeIcon}>Home</TabItem>,
+          tabBarIcon: ({ focused }) => <TabItem icon={HomeIcon}>Home</TabItem>,
         }}
       />
       <Tabs.Screen
         name="create-subscription"
         options={{
           title: "Create",
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <TabItem icon={PlusSquare}>Create</TabItem>
           ),
         }}
@@ -41,7 +47,7 @@ export default function Layout() {
         name="settings"
         options={{
           title: "Settings",
-          tabBarIcon: ({focused}) => (
+          tabBarIcon: ({ focused }) => (
             <TabItem icon={Settings}>Settings</TabItem>
           ),
         }}
@@ -55,20 +61,22 @@ export type TabItemProps = TabTriggerSlotProps & {
   ref?: Ref<View>;
 };
 
-const TabItem = ({icon: Icon, children, isFocused, ...props}: TabItemProps) => {
+const TabItem = ({ icon: Icon, children, isFocused, ...props }: TabItemProps) => {
+  const { colors } = useAppTheme();
+
   return (
     <Pressable
       {...props}
       style={{
         flex: 1,
-        width: "100%",
-        height: "100%",
         justifyContent: "center",
         alignItems: "center",
       }}
     >
-      <Icon size={16} />
-      <Text>{children}</Text>
+      <Icon size={18} color={isFocused ? colors.primary : colors.textMuted} />
+      <Text style={{ color: isFocused ? colors.primary : colors.textMuted }}>
+        {children}
+      </Text>
     </Pressable>
   );
 };
