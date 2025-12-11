@@ -27,7 +27,7 @@ export class DashboardService {
 
     @Inject(CACHE_MANAGER)
     private readonly cache: Cache,
-  ) { }
+  ) {}
 
   async getGlobalDashboard(user: User) {
     const isAdmin = await user.publicMetadata?.role;

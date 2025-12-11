@@ -15,10 +15,17 @@ export default function DashboardPage() {
     const { data, isLoading } = useGetDashboardStats();
 
 
+
     if (isLoading)
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <Spinner />
+            </div>
+        )
+    if (isLoading)
+        return (
+            <div className="p-4">
+                <p className="text-muted-foreground">Loading dashboard...</p>
             </div>
         );
 
@@ -26,7 +33,6 @@ export default function DashboardPage() {
 
     return (
         <div className=" p-2 space-y-8">
-            {/* ---------- Stats Grid ---------- */}
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 <Card>
                     <CardHeader>
@@ -73,7 +79,6 @@ export default function DashboardPage() {
                 </Card>
             </div>
 
-            {/* ---------- Queue Status ---------- */}
             <Card>
                 <CardHeader>
                     <CardTitle>Queue Status</CardTitle>
@@ -92,7 +97,6 @@ export default function DashboardPage() {
                 </CardContent>
             </Card>
 
-            {/* ---------- Users Table ---------- */}
             <Card>
                 <CardHeader>
                     <CardTitle>Users</CardTitle>

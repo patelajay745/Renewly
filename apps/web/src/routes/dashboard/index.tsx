@@ -1,4 +1,3 @@
-// routes/dashboard/index.tsx
 import { AppSidebar } from "@/components/app-sidebar";
 import DashboardPage from "@/components/DashboardPage";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
