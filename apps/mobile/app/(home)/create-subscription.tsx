@@ -8,6 +8,8 @@ import {
   TextInput,
   useColorScheme,
   FlatList,
+  Switch,
+  TouchableOpacity,
 } from "react-native";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
@@ -115,6 +117,11 @@ const CreateSubscription: FC<Props> = (props) => {
 
     return token;
   }
+
+  const onSubmit = (data: SubscriptionFormData) => {
+    console.log("Form submitted:", data);
+    // Handle form submission here
+  };
   return (
     <View style={[styles.container, {backgroundColor: colors.background}]}>
       <Header showHeaderContent={false} />
@@ -233,11 +240,58 @@ const CreateSubscription: FC<Props> = (props) => {
                 )}
               />
             </View>
+
+            <View
+              style={[
+                styles.inputContainer,
+                {
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                },
+              ]}
+            >
+              <Text style={[styles.inputText, {color: colors.text}]}>
+                Notification
+              </Text>
+
+              <Controller
+                control={control}
+                name="notification"
+                render={({field: {onChange, onBlur, value}}) => (
+                  <Switch
+                    value={value}
+                    onValueChange={onChange}
+                    trackColor={{
+                      false: colors.disabled,
+                      true: colors.success,
+                    }}
+                    thumbColor={colors.surface}
+                  />
+                )}
+              />
+            </View>
           </View>
         )}
+        ListFooterComponent={() => {
+          return (
+            <TouchableOpacity
+              style={[styles.submitButton, {backgroundColor: colors.primary}]}
+              onPress={handleSubmit(onSubmit)}
+            >
+              <Text
+                style={[
+                  styles.submitButtonText,
+                  {color: colors.foregroundText},
+                ]}
+              >
+                Create Subscription
+              </Text>
+            </TouchableOpacity>
+          );
+        }}
         ListHeaderComponent={() => (
           <Text style={[styles.screenTitle, {color: colors.text}]}>
-            {" "}
             Create Subscription
           </Text>
         )}
@@ -263,8 +317,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   screenTitle: {
-    fontSize: 30,
-    fontWeight: "700",
+    fontSize: 28,
+    fontWeight: "bold",
   },
   inputView: {
     paddingHorizontal: 10,
@@ -275,13 +329,22 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   textInput: {
-    padding: 16,
-    fontSize: 18,
-    borderRadius: 12,
+    height: 50,
     borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    fontSize: 16,
   },
   inputContainer: {
     gap: 5,
   },
+  submitButton: {
+    height: 56,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 32,
+  },
+  submitButtonText: {fontSize: 18, fontWeight: "600"},
 });
 export default CreateSubscription;
