@@ -1,4 +1,4 @@
-import {Tabs} from "expo-router";
+import {Redirect, Tabs, useRouter} from "expo-router";
 import {
   HomeIcon,
   LucideIcon,
@@ -12,8 +12,15 @@ import {
 } from "lucide-react-native";
 import {Pressable, Text, View, StyleSheet, Platform} from "react-native";
 import {useAppTheme} from "@/providers/ThemeProvider";
+import {useUser} from "@clerk/clerk-expo";
+import {useEffect} from "react";
 
 export default function Layout() {
+  const {isSignedIn} = useUser();
+  const router = useRouter();
+
+  if (!isSignedIn) return <Redirect href={"/sign-in"} />;
+
   const {colors} = useAppTheme();
   return (
     <Tabs
@@ -27,6 +34,7 @@ export default function Layout() {
           elevation: 0,
           height: 100,
           paddingBottom: Platform.OS === "ios" ? 20 : 10,
+          marginBottom: 200,
         },
       }}
       tabBar={(props) => <CustomTabBar {...props} />}

@@ -73,7 +73,7 @@ const SocialLoginButton = ({
     try {
       setIsLoading(true);
       const {createdSessionId, setActive} = await startOAuthFlow({
-        redirectUrl: Linking.createURL("/", {scheme: "Gatherly"}),
+        redirectUrl: Linking.createURL("/", {scheme: "renewly"}),
       });
 
       // If sign in was successful, set the active session
