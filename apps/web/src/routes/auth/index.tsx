@@ -1,5 +1,11 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSignIn, useUser } from "@clerk/clerk-react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { FcGoogle } from "react-icons/fc";
+import { FaApple } from "react-icons/fa6";
+import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/auth/")({
   component: SignInPage,
@@ -27,62 +33,68 @@ export function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center from-gray-900 to-black px-4">
-      <div className="max-w-md w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 text-white space-y-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-black px-4">
+      <Card className="max-w-md w-full bg-white/10 backdrop-blur-md border border-white/20 text-white">
+        <CardHeader className="text-center space-y-1">
+          <CardTitle className="text-2xl font-bold">Welcome Back!</CardTitle>
+          <CardDescription className="text-gray-300">
+            Sign in to continue to Renewly
+          </CardDescription>
+        </CardHeader>
 
-        <h1 className="text-3xl font-bold text-center">Welcome Back!</h1>
-        <p className="text-center text-gray-300">
-          Sign in to continue to Renewly
-        </p>
+        <CardContent className="space-y-6">
+          {/* Social OAuth Buttons */}
+          <div className="flex flex-col gap-3">
+            <Button
+              variant="default"
+              className="bg-gray-800 hover:bg-gray-900 text-white"
+              onClick={() => signInWith("oauth_google")}
+            >
+              <FcGoogle /> Continue with Google
+            </Button>
 
-        {/* Social Sign-In Buttons */}
-        <div className="space-y-3">
-          <button
-            onClick={() => signInWith("oauth_google")}
-            className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 transition p-3 rounded-xl font-semibold"
-          >
-            Continue with Google
-          </button>
+            <Button
+              variant="default"
+              className="bg-gray-800 hover:bg-gray-900 text-white"
+              onClick={() => signInWith("oauth_apple")}
+            >
+              <FaApple /> Continue with Apple
+            </Button>
+          </div>
 
-          <button
-            onClick={() => signInWith("oauth_apple")}
-            className="w-full flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-900 transition p-3 rounded-xl font-semibold"
-          >
-            Continue with Apple
-          </button>
-        </div>
+          {/* OR Separator */}
+          <div className="flex items-center gap-3 text-sm text-gray-400">
+            <Separator className="flex-1" />
+            <span>or</span>
+            <Separator className="flex-1" />
+          </div>
 
-        <div className="flex items-center justify-between text-sm text-gray-400">
-          <span className="border-t border-gray-500 flex mr-2"></span>
-          <span>or</span>
-          <span className="border-t border-gray-500 flex ml-2"></span>
-        </div>
+          {/* Email/Password Form */}
+          <form className="space-y-4">
+            <Input
+              type="email"
+              placeholder="Email address"
+              className="bg-gray-800 text-white"
+            />
 
-        {/* Email/Password Form (optional) */}
-        <div className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email address"
-            className="w-full p-3 rounded-xl bg-gray-800 text-white placeholder-gray-400"
-          />
+            <Input
+              type="password"
+              placeholder="Password"
+              className="bg-gray-800 text-white"
+            />
 
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full p-3 rounded-xl bg-gray-800 text-white placeholder-gray-400"
-          />
+            <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
+              Sign In
+            </Button>
+          </form>
 
-          <button className="w-full bg-indigo-600 hover:bg-indigo-700 transition p-3 rounded-xl font-semibold">
-            Sign In
-          </button>
-        </div>
-
-        <p className="text-xs text-center text-gray-400">
-          By signing in, you agree to our{" "}
-          <span className="underline cursor-pointer">Terms</span> &{" "}
-          <span className="underline cursor-pointer">Privacy Policy</span>.
-        </p>
-      </div>
+          <p className="text-xs text-center text-gray-400">
+            By signing in, you agree to our{" "}
+            <span className="underline cursor-pointer">Terms</span> &{" "}
+            <span className="underline cursor-pointer">Privacy Policy</span>.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

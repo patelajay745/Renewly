@@ -12,6 +12,7 @@ export function Dashboard() {
   const { isSignedIn } = useUser();
   const router = useRouter();
 
+
   if (!isSignedIn) {
     router.navigate({ to: "/auth" });
     return null;
