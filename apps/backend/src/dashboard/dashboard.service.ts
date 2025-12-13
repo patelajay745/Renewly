@@ -31,11 +31,11 @@ export class DashboardService {
 
   // ---------- ADMIN DASHBOARD ----------
   async getGlobalDashboard(user: User) {
-    // const isAdmin = await user.publicMetadata?.role;
+    const isAdmin = await user.publicMetadata?.role;
 
-    // if (!isAdmin) {
-    //   throw new ForbiddenException('Only admin can access this route');
-    // }
+    if (!isAdmin) {
+      throw new ForbiddenException('Only admin can access this route');
+    }
 
     const cacheKey = `dashboard:admin:${user.id}`;
 
