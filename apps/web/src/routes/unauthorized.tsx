@@ -1,11 +1,20 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { ShieldAlert } from "lucide-react"
+import { useClerk } from '@clerk/clerk-react'
 
 export const Route = createFileRoute('/unauthorized')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  const { signOut } = useClerk()
+  const router = useRouter()
+
+  const handleLoginAsAdmin = async () => {
+    await signOut()
+    router.navigate({ to: '/auth' })
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-black text-white px-4">
       <div className="max-w-md w-full text-center space-y-6 animate-in fade-in duration-500">
@@ -35,12 +44,12 @@ function RouteComponent() {
             Go Back Home
           </Link>
 
-          <Link
-            to="/auth"
+          <button
+            onClick={handleLoginAsAdmin}
             className="w-full rounded-xl bg-red-600 p-3 font-medium hover:bg-red-700 transition"
           >
             Login as Admin
-          </Link>
+          </button>
         </div>
       </div>
     </div>
