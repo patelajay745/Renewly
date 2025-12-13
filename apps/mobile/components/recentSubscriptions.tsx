@@ -23,21 +23,27 @@ export default function RecentSubscriptions({data}: Props) {
         keyExtractor={(item) => item.id}
         scrollEnabled={false}
         renderItem={({item}) => (
-          <View style={[styles.row, {borderColor: colors.borderMuted}]}>
+          <View style={[styles.row]}>
             <View>
               <Text style={[styles.mainText, {color: colors.text}]}>
                 {item.title}
               </Text>
 
               <Text style={[styles.category, {color: colors.textMuted}]}>
-                {item.category}
+                {item.category.charAt(0).toUpperCase() +
+                  item.category.slice(1).replaceAll("_", " ")}
               </Text>
             </View>
 
             <Text style={[styles.amount, {color: colors.accent}]}>
-              ₹ {item.amount}
+              $ {item.amount}
             </Text>
           </View>
+        )}
+        ItemSeparatorComponent={() => (
+          <View
+            style={[styles.separator, {backgroundColor: colors.borderMuted}]}
+          />
         )}
       />
     </View>
@@ -51,13 +57,12 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "600",
     marginBottom: 10,
   },
   row: {
     paddingVertical: 10,
-    borderBottomWidth: 0.6,
     flexDirection: "row",
     justifyContent: "space-between",
   },
@@ -66,10 +71,15 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   category: {
-    fontSize: 12,
+    fontSize: 13,
+    fontWeight: "400",
   },
   amount: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "600",
+  },
+  separator: {
+    height: 1,
+    opacity: 0.3,
   },
 });

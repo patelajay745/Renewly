@@ -10,7 +10,7 @@ export default function StatsCard({data}: {data: DashboardResponse}) {
     <View
       style={[
         styles.card,
-        {backgroundColor: colors.surface, borderColor: colors.borderLight},
+        {backgroundColor: colors.card, borderColor: colors.borderLight},
       ]}
     >
       <Text style={[styles.title, {color: colors.text}]}>
@@ -24,7 +24,7 @@ export default function StatsCard({data}: {data: DashboardResponse}) {
         <View style={styles.item}>
           <Text style={[styles.label, {color: colors.textMuted}]}>Monthly</Text>
           <Text style={[styles.amount, {color: colors.primary}]}>
-            ₹{data.stats.totalMonthlySpend}
+            ${data.stats.totalMonthlySpend}
           </Text>
         </View>
 
@@ -33,7 +33,7 @@ export default function StatsCard({data}: {data: DashboardResponse}) {
             Yearly Projection
           </Text>
           <Text style={[styles.amount, {color: colors.primary}]}>
-            ₹{data.stats.totalYearlyProjection}
+            ${data.stats.totalYearlyProjection}
           </Text>
         </View>
       </View>
@@ -49,10 +49,10 @@ const styles = StyleSheet.create({
     marginTop: 15,
     gap: 10,
   },
-  title: {fontSize: 16, fontWeight: "600"},
-  value: {fontSize: 26, fontWeight: "bold"},
+  title: {fontSize: 17, fontWeight: "600"},
+  value: {fontSize: 34, fontWeight: "bold"},
   row: {flexDirection: "row", justifyContent: "space-between"},
   item: {flex: 1},
-  label: {fontSize: 12},
-  amount: {fontSize: 18, fontWeight: "600"},
+  label: {fontSize: 13, fontWeight: "500"},
+  amount: {fontSize: 20, fontWeight: "600"},
 });

@@ -6,6 +6,7 @@ import {ThemeProvider} from "@/providers/ThemeProvider";
 import {useFonts} from "expo-font";
 import {useEffect} from "react";
 import * as SplashScreen from "expo-splash-screen";
+import {GestureHandlerRootView} from "react-native-gesture-handler";
 
 export const queryClient = new QueryClient();
 
@@ -27,12 +28,14 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ClerkProvider tokenCache={tokenCache}>
-        <ThemeProvider>
-          <Slot />
-        </ThemeProvider>
-      </ClerkProvider>
-    </QueryClientProvider>
+    <GestureHandlerRootView style={{flex: 1}}>
+      <QueryClientProvider client={queryClient}>
+        <ClerkProvider tokenCache={tokenCache}>
+          <ThemeProvider>
+            <Slot />
+          </ThemeProvider>
+        </ClerkProvider>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }

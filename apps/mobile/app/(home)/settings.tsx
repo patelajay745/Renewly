@@ -213,7 +213,7 @@ const Settings: FC<Props> = (props) => {
           <SettingItem
             icon="chatbox-outline"
             title="Leave feedback"
-            subtitle="Hilf uns dabei unsere App zu verbessern"
+            subtitle="Let's know what feature do you want to add in."
             onPress={handleFeedback}
             colors={colors}
           />

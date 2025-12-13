@@ -33,17 +33,15 @@ export default function NextPayments({data}: Props) {
             </View>
 
             <Text style={[styles.amount, {color: colors.accent}]}>
-              ₹ {item.amount}
+              $ {item.amount}
             </Text>
           </View>
         )}
-        ItemSeparatorComponent={() => {
-          return (
-            <View
-              style={{borderBottomColor: colors.border, borderWidth: 0.5}}
-            />
-          );
-        }}
+        ItemSeparatorComponent={() => (
+          <View
+            style={[styles.separator, {backgroundColor: colors.borderMuted}]}
+          />
+        )}
       />
     </View>
   );
@@ -56,7 +54,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "600",
     marginBottom: 10,
   },
@@ -71,10 +69,15 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   subText: {
-    fontSize: 12,
+    fontSize: 13,
+    fontWeight: "400",
   },
   amount: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "600",
+  },
+  separator: {
+    height: 1,
+    opacity: 0.3,
   },
 });

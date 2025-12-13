@@ -26,7 +26,7 @@ export class NotificationService {
         // Fetch all subscriptions with notifications enabled
         const subscriptions = await this.subscriptionRepository.find({
             where: {
-                notifications: true
+                notification: true
             }
         });
 

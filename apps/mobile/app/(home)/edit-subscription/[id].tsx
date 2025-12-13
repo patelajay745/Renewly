@@ -1,5 +1,5 @@
 import Header from "@/components/header";
-import {FC, useEffect, useState, useRef} from "react";
+import {FC, useEffect, useState} from "react";
 import {
   View,
   StyleSheet,
@@ -9,8 +9,7 @@ import {
   TouchableOpacity,
   Alert,
   Linking,
-  Animated,
-  Easing,
+  ActivityIndicator,
 } from "react-native";
 import {Text} from "@/components/text";
 import {TextInput} from "@/components/text-input";
@@ -23,16 +22,20 @@ import {subscriptionSchema} from "@/schemas/create-subscription";
 import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
 import DatePicker from "@/components/date-picker";
-import {useCreateSubscription} from "@/hooks/api/use-subscription";
-import {Loader2, Check} from "lucide-react-native";
+import {
+  useGetSubscription,
+  useUpdateSubscription,
+} from "@/hooks/api/use-subscription";
+import {Check} from "lucide-react-native";
 import Loader from "@/components/loader";
-import {useRouter} from "expo-router";
+import {useRouter, useLocalSearchParams} from "expo-router";
+import {Ionicons} from "@expo/vector-icons";
 
 interface Props {}
 
 export type SubscriptionFormData = z.infer<typeof subscriptionSchema>;
 
-const CreateSubscription: FC<Props> = (props) => {
+const EditSubscription: FC<Props> = (props) => {
   const [expoPushToken, setExpoPushToken] = useState<string>("");
   const [notificationPermissionGranted, setNotificationPermissionGranted] =
     useState<boolean>(false);
@@ -40,8 +43,11 @@ const CreateSubscription: FC<Props> = (props) => {
   const [isSuccessful, setIsSuccessful] = useState<boolean>(false);
   const {colors} = useAppTheme();
   const router = useRouter();
+  const {id} = useLocalSearchParams<{id: string}>();
 
-  const {mutate, isPending, isSuccess} = useCreateSubscription();
+  const {data: subscription, isLoading: isLoadingSubscription} =
+    useGetSubscription(id!);
+  const {mutate, isPending, isSuccess} = useUpdateSubscription();
 
   const {
     handleSubmit,
@@ -60,6 +66,20 @@ const CreateSubscription: FC<Props> = (props) => {
       startDate: new Date(),
     },
   });
+
+  // Pre-fill form when subscription data is loaded
+  useEffect(() => {
+    if (subscription) {
+      reset({
+        title: subscription.title,
+        amount: subscription.amount,
+        type: subscription.type,
+        notification: subscription.notification,
+        category: subscription.category,
+        startDate: new Date(subscription.startDate),
+      });
+    }
+  }, [subscription, reset]);
 
   useEffect(() => {
     registerForPushNotificationsAsync();
@@ -132,30 +152,73 @@ const CreateSubscription: FC<Props> = (props) => {
   }
 
   const onSubmit = (data: SubscriptionFormData) => {
-    if (!expoPushToken) return;
+    if (!id) return;
 
-    const dataTobeSubmitted = {...data, expoToken: expoPushToken};
+    const dataTobeSubmitted = {
+      ...data,
+      expoToken: expoPushToken || subscription?.expoToken || "",
+    };
 
-    mutate(dataTobeSubmitted, {
-      onSuccess: () => {
-        setIsSuccessful(true);
-
-        reset();
-
-        setTimeout(() => {
-          router.push("/");
-        }, 2000);
-      },
-      onError: (error) => {
-        Alert.alert(
-          "Error",
-          "Failed to create subscription. Please try again.",
-          [{text: "OK"}]
-        );
-        console.error("Subscription creation error:", error);
-      },
-    });
+    mutate(
+      {id, data: dataTobeSubmitted},
+      {
+        onSuccess: () => {
+          setIsSuccessful(true);
+          Alert.alert("Success", "Subscription updated successfully", [
+            {
+              text: "OK",
+              onPress: () => {
+                router.back();
+              },
+            },
+          ]);
+        },
+        onError: (error) => {
+          Alert.alert(
+            "Error",
+            "Failed to update subscription. Please try again.",
+            [{text: "OK"}]
+          );
+          console.error("Subscription update error:", error);
+        },
+      }
+    );
   };
+
+  if (isLoadingSubscription) {
+    return (
+      <View
+        style={[styles.loadingContainer, {backgroundColor: colors.background}]}
+      >
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={[styles.loadingText, {color: colors.textMuted}]}>
+          Loading subscription...
+        </Text>
+      </View>
+    );
+  }
+
+  if (!subscription) {
+    return (
+      <View
+        style={[styles.loadingContainer, {backgroundColor: colors.background}]}
+      >
+        <Ionicons name="alert-circle-outline" size={48} color={colors.error} />
+        <Text style={[styles.loadingText, {color: colors.error}]}>
+          Subscription not found
+        </Text>
+        <TouchableOpacity
+          style={[styles.backButton, {backgroundColor: colors.primary}]}
+          onPress={() => router.back()}
+        >
+          <Text style={[styles.backButtonText, {color: colors.foregroundText}]}>
+            Go Back
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.container, {backgroundColor: colors.background}]}>
       <Header showHeaderContent={false} />
@@ -395,7 +458,7 @@ const CreateSubscription: FC<Props> = (props) => {
                       {color: colors.foregroundText},
                     ]}
                   >
-                    Creating subscription
+                    Updating subscription
                   </Text>
                   <Loader />
                 </>
@@ -407,7 +470,7 @@ const CreateSubscription: FC<Props> = (props) => {
                       {color: colors.foregroundText},
                     ]}
                   >
-                    Subscription created
+                    Subscription updated
                   </Text>
                   <Check size={24} color={colors.foregroundText} />
                 </>
@@ -418,7 +481,7 @@ const CreateSubscription: FC<Props> = (props) => {
                     {color: colors.foregroundText},
                   ]}
                 >
-                  Create Subscription
+                  Update Subscription
                 </Text>
               )}
             </TouchableOpacity>
@@ -429,7 +492,7 @@ const CreateSubscription: FC<Props> = (props) => {
             style={[styles.screenTitle, {color: colors.text}]}
             variant="title"
           >
-            Create Subscription
+            Edit Subscription
           </Text>
         )}
         contentContainerStyle={{paddingHorizontal: 10, marginTop: 20}}
@@ -442,6 +505,26 @@ const CreateSubscription: FC<Props> = (props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 16,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  backButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 16,
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
   },
   contentContainer: {
     flex: 1,
@@ -486,4 +569,4 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {fontSize: 18, fontWeight: "600"},
 });
-export default CreateSubscription;
+export default EditSubscription;

@@ -30,7 +30,7 @@ export class Subscription {
   type: SubscriptionType;
 
   @Column({ type: 'boolean', default: false })
-  notifications: boolean;
+  notification: boolean;
 
   @Column()
   category: string;

@@ -46,7 +46,7 @@ export class CreateSubscriptionDto {
   @IsNotEmpty({ message: 'Notifications is required' })
   @IsBoolean({ message: 'Notifications must be a boolean' })
   @Transform(({ value }) => value === 'true' || value === true || value === 1)
-  notifications: boolean;
+  notification: boolean;
 
   @ApiProperty({
     example: 'Software',

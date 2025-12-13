@@ -22,7 +22,7 @@ export interface RecentSubscription {
   title: string;
   amount: number;
   type: "weekly" | "monthly" | "yearly";
-  notifications: boolean;
+  notification: boolean;
   category: string;
   startDate: string;
   expoToken: string | null;

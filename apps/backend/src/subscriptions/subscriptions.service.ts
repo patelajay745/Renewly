@@ -132,8 +132,8 @@ export class SubscriptionsService {
         findforUpdate.category = updateSubscriptionDto.category;
       }
 
-      if (updateSubscriptionDto.notifications !== undefined) {
-        findforUpdate.notifications = updateSubscriptionDto.notifications;
+      if (updateSubscriptionDto.notification !== undefined) {
+        findforUpdate.notification = updateSubscriptionDto.notification;
       }
 
       if (updateSubscriptionDto.title !== undefined) {
@@ -144,8 +144,8 @@ export class SubscriptionsService {
         findforUpdate.type = updateSubscriptionDto.type;
       }
 
-      if(updateSubscriptionDto.expoToken!== undefined){
-        findforUpdate.expoToken=updateSubscriptionDto.expoToken
+      if (updateSubscriptionDto.expoToken !== undefined) {
+        findforUpdate.expoToken = updateSubscriptionDto.expoToken
       }
 
       if (updateSubscriptionDto.startDate !== undefined) {

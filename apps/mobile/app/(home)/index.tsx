@@ -12,7 +12,7 @@ import {FlatList, Platform, StyleSheet, View} from "react-native";
 export default function Page() {
   const {colors} = useAppTheme();
   const {user} = useUser();
-  const {data, isLoading} = useGetDashboardStats();
+  const {data, isLoading, refetch} = useGetDashboardStats();
 
   if (isLoading)
     return (
@@ -40,6 +40,8 @@ export default function Page() {
             {data && <NextPayments data={data.nextPayments} />}
           </>
         )}
+        onRefresh={refetch}
+        refreshing={isLoading}
       />
     </View>
   );
@@ -51,11 +53,11 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom: Platform.OS === "ios" ? 80 : 120,
+    paddingBottom: Platform.OS === "ios" ? 120 : 120,
   },
   heading: {
-    fontSize: 20,
-    fontWeight: "600",
+    fontSize: 28,
+    fontWeight: "700",
     marginVertical: 10,
   },
   loadingText: {

@@ -27,7 +27,7 @@ export class DashboardService {
 
     @Inject(CACHE_MANAGER)
     private readonly cache: Cache,
-  ) {}
+  ) { }
 
   // ---------- ADMIN DASHBOARD ----------
   async getGlobalDashboard(user: User) {
@@ -102,7 +102,7 @@ export class DashboardService {
         .createQueryBuilder('s')
         .select('COUNT(DISTINCT s.clerkUserId)', 'count')
         .getRawOne(),
-      this.subscriptionRepository.count({ where: { notifications: true } }),
+      this.subscriptionRepository.count({ where: { notification: true } }),
       this.subscriptionRepository
         .createQueryBuilder('s')
         .where('s.expoToken IS NOT NULL')
@@ -139,7 +139,7 @@ export class DashboardService {
       ),
     };
 
-    await this.cache.set(cacheKey, result, 60_000); // 60 sec cache
+    await this.cache.set(cacheKey, result, 60_000); 
 
     return result;
   }
@@ -199,7 +199,7 @@ export class DashboardService {
       .reduce((sum, s) => sum + s.amount, 0);
 
     const notificationsEnabledCount = subscriptions.filter(
-      (s) => s.notifications === true,
+      (s) => s.notification === true,
     ).length;
     const expoTokenRegistered = subscriptions.some((s) => s.expoToken);
 
