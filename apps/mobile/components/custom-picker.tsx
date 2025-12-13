@@ -8,12 +8,13 @@ import {
   TouchableOpacity,
   Animated,
   Easing,
-  Text,
   Modal,
   useColorScheme,
   ScrollView,
   Platform,
 } from "react-native";
+import {Text} from "./text";
+import {useAppTheme} from "@/providers/ThemeProvider";
 
 export interface PickerOption {
   label: string;
@@ -38,8 +39,7 @@ const CustomPicker: FC<Props> = ({
   const [isVisible, setIsVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
   const [tempSelectedValue, setTempSelectedValue] = useState(selectedValue);
-  const colorScheme = useColorScheme();
-  const colors = semanticColors[colorScheme ?? "light"];
+  const {colors} = useAppTheme();
 
   const openPicker = () => {
     setIsVisible(true);
@@ -123,7 +123,10 @@ const CustomPicker: FC<Props> = ({
                 {borderBottomColor: colors.background},
               ]}
             >
-              <Text style={[styles.pickerTitle, {color: colors.text}]}>
+              <Text
+                style={[styles.pickerTitle, {color: colors.text}]}
+                variant="heading"
+              >
                 Select Option
               </Text>
             </View>

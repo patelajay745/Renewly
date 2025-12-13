@@ -136,9 +136,8 @@ const CustomTabBar = ({state, navigation}: any) => {
             }
           };
 
-          const isProfile = tab.route === "profile";
-          const bgColor = isProfile ? colors.info : colors.surface;
-          const iconColor = isProfile ? colors.foregroundText : colors.text;
+          const bgColor = colors.surface;
+          const iconColor = colors.text;
 
           return (
             <Pressable

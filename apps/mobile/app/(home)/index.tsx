@@ -2,11 +2,12 @@ import Header from "@/components/header";
 import NextPayments from "@/components/nextPayments";
 import RecentSubscriptions from "@/components/recentSubscriptions";
 import StatsCard from "@/components/stateCard";
+import {Text} from "@/components/text";
 
 import {useGetDashboardStats} from "@/hooks/api/use-dashboard";
 import {useAppTheme} from "@/providers/ThemeProvider";
 import {useUser} from "@clerk/clerk-expo";
-import {FlatList, Platform, StyleSheet, Text, View} from "react-native";
+import {FlatList, Platform, StyleSheet, View} from "react-native";
 
 export default function Page() {
   const {colors} = useAppTheme();

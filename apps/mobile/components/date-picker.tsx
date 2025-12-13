@@ -5,7 +5,6 @@ import {
   ViewStyle,
   TextStyle,
   TouchableOpacity,
-  Text,
   Modal,
   Dimensions,
   Animated,
@@ -16,6 +15,8 @@ import {
 } from "react-native";
 import {semanticColors} from "@/constants/theme";
 import {CalendarIcon, ChevronLeft, ChevronRight} from "lucide-react-native";
+import {Text} from "./text";
+import {useAppTheme} from "@/providers/ThemeProvider";
 
 interface BaseDatePickerProps {
   label?: string;
@@ -84,8 +85,7 @@ const DatePicker: FC<Props> = ({
   );
   const slideAnim = useRef(new Animated.Value(screenHeight)).current;
 
-  const colorScheme = useColorScheme();
-  const colors = semanticColors[colorScheme ?? "light"];
+  const {colors} = useAppTheme();
 
   const openPicker = () => {
     const defaultDate = getCurrentDate();
@@ -314,7 +314,10 @@ const DatePicker: FC<Props> = ({
                 {borderBottomColor: colors.borderLight},
               ]}
             >
-              <Text style={[styles.pickerTitle, {color: colors.text}]}>
+              <Text
+                style={[styles.pickerTitle, {color: colors.text}]}
+                variant="heading"
+              >
                 Select Date
               </Text>
             </View>

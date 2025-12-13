@@ -3,41 +3,45 @@ import {FC, useEffect, useState} from "react";
 import {
   View,
   StyleSheet,
-  Text,
   Platform,
-  TextInput,
-  useColorScheme,
   FlatList,
   Switch,
   TouchableOpacity,
+  Alert,
+  Linking,
 } from "react-native";
+import {Text} from "@/components/text";
+import {TextInput} from "@/components/text-input";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
-import {semanticColors} from "@/constants/theme";
+import {useAppTheme} from "@/providers/ThemeProvider";
 import CustomPicker, {PickerOption} from "@/components/custom-picker";
 import {Controller, useForm} from "react-hook-form";
 import {subscriptionSchema} from "@/schemas/create-subscription";
 import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
 import DatePicker from "@/components/date-picker";
+import {useCreateSubscription} from "@/hooks/api/use-subscription";
 
 interface Props {}
 
-type SubscriptionFormData = z.infer<typeof subscriptionSchema>;
+export type SubscriptionFormData = z.infer<typeof subscriptionSchema>;
 
 const CreateSubscription: FC<Props> = (props) => {
   const [expoPushToken, setExpoPushToken] = useState<string>("");
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-  const colorScheme = useColorScheme();
-  const colors = semanticColors[colorScheme ?? "light"];
+  const [notificationPermissionGranted, setNotificationPermissionGranted] =
+    useState<boolean>(false);
+  const [notificationError, setNotificationError] = useState<string>("");
+  const {colors} = useAppTheme();
+
+  const {mutate, isPending, isSuccess} = useCreateSubscription();
 
   const {
-    register,
     handleSubmit,
-    watch,
     control,
-    formState: {errors},
+    formState: {errors, isDirty, isValid},
   } = useForm<SubscriptionFormData>({
+    mode: "onChange",
     resolver: zodResolver(subscriptionSchema),
     defaultValues: {
       title: "",
@@ -48,8 +52,6 @@ const CreateSubscription: FC<Props> = (props) => {
       startDate: new Date(),
     },
   });
-
-  const [selectedType, setSelectedType] = useState();
 
   useEffect(() => {
     registerForPushNotificationsAsync();
@@ -73,9 +75,9 @@ const CreateSubscription: FC<Props> = (props) => {
     {label: "Other", value: "other"},
   ];
 
-  async function registerForPushNotificationsAsync() {
-    let token;
+  let token: string;
 
+  async function registerForPushNotificationsAsync() {
     if (Platform.OS === "android") {
       await Notifications.setNotificationChannelAsync("default", {
         name: "default",
@@ -97,9 +99,11 @@ const CreateSubscription: FC<Props> = (props) => {
 
       if (finalStatus !== "granted") {
         console.log("Failed to get push token for push notification!");
+        setNotificationPermissionGranted(false);
         return;
       }
 
+      setNotificationPermissionGranted(true);
       try {
         token = (
           await Notifications.getExpoPushTokenAsync({
@@ -113,6 +117,7 @@ const CreateSubscription: FC<Props> = (props) => {
       }
     } else {
       console.log("Must use physical device for Push Notifications");
+      setNotificationPermissionGranted(false);
     }
 
     return token;
@@ -120,7 +125,12 @@ const CreateSubscription: FC<Props> = (props) => {
 
   const onSubmit = (data: SubscriptionFormData) => {
     console.log("Form submitted:", data);
-    // Handle form submission here
+
+    if (!expoPushToken) return;
+
+    const dataTobeSubmitted = {...data, expoToken: expoPushToken};
+
+    mutate(dataTobeSubmitted);
   };
   return (
     <View style={[styles.container, {backgroundColor: colors.background}]}>
@@ -155,6 +165,11 @@ const CreateSubscription: FC<Props> = (props) => {
                   />
                 )}
               />
+              {errors.title && (
+                <Text style={{color: "red", fontSize: 12}}>
+                  {errors.title.message}
+                </Text>
+              )}
             </View>
 
             <View style={styles.inputContainer}>
@@ -176,12 +191,19 @@ const CreateSubscription: FC<Props> = (props) => {
                       {color: colors.text},
                     ]}
                     onBlur={onBlur}
-                    onChangeText={onChange}
+                    onChangeText={(text) => {
+                      onChange(+text);
+                    }}
                     value={value.toString()}
                     keyboardType="numeric"
                   />
                 )}
               />
+              {errors.amount && (
+                <Text style={{color: "red", fontSize: 12}}>
+                  {errors.amount.message}
+                </Text>
+              )}
             </View>
 
             <View style={styles.inputContainer}>
@@ -199,6 +221,11 @@ const CreateSubscription: FC<Props> = (props) => {
                   />
                 )}
               />
+              {errors.type && (
+                <Text style={{color: "red", fontSize: 12}}>
+                  {errors.type.message}
+                </Text>
+              )}
             </View>
 
             <View style={styles.inputContainer}>
@@ -218,6 +245,11 @@ const CreateSubscription: FC<Props> = (props) => {
                   />
                 )}
               />
+              {errors.category && (
+                <Text style={{color: "red", fontSize: 12}}>
+                  {errors.category.message}
+                </Text>
+              )}
             </View>
 
             <View style={styles.inputContainer}>
@@ -231,10 +263,9 @@ const CreateSubscription: FC<Props> = (props) => {
                 render={({field: {onChange, onBlur, value}}) => (
                   <DatePicker
                     placeholder="Choose a date"
-                    value={selectedDate}
+                    value={value}
                     onChange={(date) => {
-                      setSelectedDate(date);
-                      onChange(date ? date.toISOString().split("T")[0] : "");
+                      onChange(date || new Date());
                     }}
                   />
                 )}
@@ -251,9 +282,22 @@ const CreateSubscription: FC<Props> = (props) => {
                 },
               ]}
             >
-              <Text style={[styles.inputText, {color: colors.text}]}>
-                Notification
-              </Text>
+              <View style={{flex: 1}}>
+                <Text style={[styles.inputText, {color: colors.text}]}>
+                  Notification
+                </Text>
+                {!notificationPermissionGranted && (
+                  <Text
+                    style={{
+                      color: colors.textSecondary,
+                      fontSize: 12,
+                      marginTop: 2,
+                    }}
+                  >
+                    Permission not granted
+                  </Text>
+                )}
+              </View>
 
               <Controller
                 control={control}
@@ -261,7 +305,36 @@ const CreateSubscription: FC<Props> = (props) => {
                 render={({field: {onChange, onBlur, value}}) => (
                   <Switch
                     value={value}
-                    onValueChange={onChange}
+                    onValueChange={(newValue) => {
+                      if (newValue && !notificationPermissionGranted) {
+                        setNotificationError(
+                          "Notification permission is required"
+                        );
+                        Alert.alert(
+                          "Permission Required",
+                          "Please enable notification permissions in your device settings to use this feature.",
+                          [
+                            {
+                              text: "Cancel",
+                              style: "cancel",
+                            },
+                            {
+                              text: "Open Settings",
+                              onPress: () => {
+                                if (Platform.OS === "ios") {
+                                  Linking.openURL("app-settings:");
+                                } else {
+                                  Linking.openSettings();
+                                }
+                              },
+                            },
+                          ]
+                        );
+                        return;
+                      }
+                      setNotificationError("");
+                      onChange(newValue);
+                    }}
                     trackColor={{
                       false: colors.disabled,
                       true: colors.success,
@@ -271,13 +344,23 @@ const CreateSubscription: FC<Props> = (props) => {
                 )}
               />
             </View>
+            {notificationError && (
+              <Text style={{color: "red", fontSize: 12, marginTop: -15}}>
+                {notificationError}
+              </Text>
+            )}
           </View>
         )}
         ListFooterComponent={() => {
           return (
             <TouchableOpacity
-              style={[styles.submitButton, {backgroundColor: colors.primary}]}
+              style={[
+                styles.submitButton,
+                {backgroundColor: colors.primary},
+                {opacity: !isValid ? 0.5 : 1},
+              ]}
               onPress={handleSubmit(onSubmit)}
+              disabled={!isValid}
             >
               <Text
                 style={[
@@ -291,7 +374,10 @@ const CreateSubscription: FC<Props> = (props) => {
           );
         }}
         ListHeaderComponent={() => (
-          <Text style={[styles.screenTitle, {color: colors.text}]}>
+          <Text
+            style={[styles.screenTitle, {color: colors.text}]}
+            variant="title"
+          >
             Create Subscription
           </Text>
         )}
