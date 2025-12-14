@@ -221,7 +221,7 @@ const EditSubscription: FC<Props> = (props) => {
 
   return (
     <View style={[styles.container, {backgroundColor: colors.background}]}>
-      <Header showHeaderContent={false} />
+      <Header title="Edit Subscription" />
 
       <FlatList
         data={[1]}
@@ -487,14 +487,6 @@ const EditSubscription: FC<Props> = (props) => {
             </TouchableOpacity>
           );
         }}
-        ListHeaderComponent={() => (
-          <Text
-            style={[styles.screenTitle, {color: colors.text}]}
-            variant="title"
-          >
-            Edit Subscription
-          </Text>
-        )}
         contentContainerStyle={{paddingHorizontal: 10, marginTop: 20}}
         ListHeaderComponentStyle={{marginBottom: 20}}
       />

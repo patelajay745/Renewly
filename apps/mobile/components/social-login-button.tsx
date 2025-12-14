@@ -12,6 +12,7 @@ import {
 import * as Linking from "expo-linking";
 import React, {useState} from "react";
 import {semanticColors} from "@/constants/theme";
+import {useAppTheme} from "@/providers/ThemeProvider";
 
 const SocialLoginButton = ({
   strategy,
@@ -29,9 +30,7 @@ const SocialLoginButton = ({
     return "oauth_facebook";
   };
 
-  const colorScheme = useColorScheme();
-
-  const colors = semanticColors[colorScheme ?? "light"];
+  const {colors, mode} = useAppTheme();
 
   const {startOAuthFlow} = useOAuth({strategy: getStrategy()});
   const {user} = useUser();
@@ -62,7 +61,7 @@ const SocialLoginButton = ({
         <Ionicons
           name="logo-apple"
           size={24}
-          color={colorScheme === "light" ? "dark" : "white"}
+          color={mode === "light" ? "dark" : "white"}
         />
       );
     }

@@ -1,27 +1,15 @@
-import {Redirect, Tabs, useRouter} from "expo-router";
-import {
-  HomeIcon,
-  LucideIcon,
-  Search,
-  QrCode,
-  Clock,
-  User,
-  Plus,
-  History,
-  Settings,
-} from "lucide-react-native";
-import {Pressable, Text, View, StyleSheet, Platform} from "react-native";
+import {Redirect, Tabs} from "expo-router";
+import {HomeIcon, Plus, History, Settings} from "lucide-react-native";
+import {Pressable, View, StyleSheet, Platform} from "react-native";
 import {useAppTheme} from "@/providers/ThemeProvider";
 import {useUser} from "@clerk/clerk-expo";
-import {useEffect} from "react";
+import {Text} from "@/components/text";
 
 export default function Layout() {
   const {isSignedIn} = useUser();
-  const router = useRouter();
 
   if (!isSignedIn) return <Redirect href={"/sign-in"} />;
 
-  const {colors} = useAppTheme();
   return (
     <Tabs
       screenOptions={{

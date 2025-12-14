@@ -9,13 +9,9 @@ import {
   TouchableOpacity,
   Alert,
   Linking,
-  Animated,
-  Easing,
 } from "react-native";
 import {Text} from "@/components/text";
 import {TextInput} from "@/components/text-input";
-import * as Notifications from "expo-notifications";
-import * as Device from "expo-device";
 import {useAppTheme} from "@/providers/ThemeProvider";
 import CustomPicker, {PickerOption} from "@/components/custom-picker";
 import {Controller, useForm} from "react-hook-form";
@@ -24,20 +20,21 @@ import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
 import DatePicker from "@/components/date-picker";
 import {useCreateSubscription} from "@/hooks/api/use-subscription";
-import {Loader2, Check} from "lucide-react-native";
+import {Check} from "lucide-react-native";
 import Loader from "@/components/loader";
 import {useRouter} from "expo-router";
+import {getExpoNotificationToken} from "@/lib/expo-notification-token";
 
 interface Props {}
 
 export type SubscriptionFormData = z.infer<typeof subscriptionSchema>;
 
 const CreateSubscription: FC<Props> = (props) => {
-  const [expoPushToken, setExpoPushToken] = useState<string>("");
-  const [notificationPermissionGranted, setNotificationPermissionGranted] =
-    useState<boolean>(false);
   const [notificationError, setNotificationError] = useState<string>("");
   const [isSuccessful, setIsSuccessful] = useState<boolean>(false);
+  const [expoPushToken, setExpoPushToken] = useState<string>("");
+  const [notificationGranted, setNotificationGranted] =
+    useState<boolean>(false);
   const {colors} = useAppTheme();
   const router = useRouter();
 
@@ -62,7 +59,15 @@ const CreateSubscription: FC<Props> = (props) => {
   });
 
   useEffect(() => {
-    registerForPushNotificationsAsync();
+    const initializeNotifications = async () => {
+      const result = await getExpoNotificationToken();
+      if (result) {
+        setExpoPushToken(result.token);
+        setNotificationGranted(result.notificationGranted);
+      }
+    };
+
+    initializeNotifications();
   }, []);
 
   const typeOptions: PickerOption[] = [
@@ -84,52 +89,6 @@ const CreateSubscription: FC<Props> = (props) => {
   ];
 
   let token: string;
-
-  async function registerForPushNotificationsAsync() {
-    if (Platform.OS === "android") {
-      await Notifications.setNotificationChannelAsync("default", {
-        name: "default",
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#FF231F7C",
-      });
-    }
-
-    if (Device.isDevice) {
-      const {status: existingStatus} =
-        await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-
-      if (existingStatus !== "granted") {
-        const {status} = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-
-      if (finalStatus !== "granted") {
-        console.log("Failed to get push token for push notification!");
-        setNotificationPermissionGranted(false);
-        return;
-      }
-
-      setNotificationPermissionGranted(true);
-      try {
-        token = (
-          await Notifications.getExpoPushTokenAsync({
-            projectId: "7e666261-6612-4122-9157-e4cbaab8492a",
-          })
-        ).data;
-        console.log("📱 Expo Push Token:", token);
-        setExpoPushToken(token);
-      } catch (error) {
-        console.error("Error getting push token:", error);
-      }
-    } else {
-      console.log("Must use physical device for Push Notifications");
-      setNotificationPermissionGranted(false);
-    }
-
-    return token;
-  }
 
   const onSubmit = (data: SubscriptionFormData) => {
     if (!expoPushToken) return;
@@ -311,7 +270,7 @@ const CreateSubscription: FC<Props> = (props) => {
                 <Text style={[styles.inputText, {color: colors.text}]}>
                   Notification
                 </Text>
-                {!notificationPermissionGranted && (
+                {!notificationGranted && (
                   <Text
                     style={{
                       color: colors.textSecondary,
@@ -331,7 +290,7 @@ const CreateSubscription: FC<Props> = (props) => {
                   <Switch
                     value={value}
                     onValueChange={(newValue) => {
-                      if (newValue && !notificationPermissionGranted) {
+                      if (newValue && !notificationGranted) {
                         setNotificationError(
                           "Notification permission is required"
                         );

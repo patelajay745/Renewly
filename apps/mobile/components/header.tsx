@@ -3,7 +3,6 @@ import {
   View,
   StyleSheet,
   Platform,
-  Text,
   TouchableOpacity,
   useColorScheme,
 } from "react-native";
@@ -11,6 +10,7 @@ import BackButton from "./back-button";
 import {EditIcon, LinkIcon} from "lucide-react-native";
 import {semanticColors} from "@/constants/theme";
 import {useAppTheme} from "@/providers/ThemeProvider";
+import {Text} from "./text";
 
 interface Props {
   title?: string;

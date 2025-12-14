@@ -411,12 +411,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   title: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
     flex: 1,
   },
   amount: {
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: "700",
   },
   cardDetails: {

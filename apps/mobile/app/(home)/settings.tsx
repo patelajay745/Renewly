@@ -230,12 +230,7 @@ const Settings: FC<Props> = (props) => {
             }
             colors={colors}
           />
-          <SettingItem
-            icon="trash-outline"
-            title="Clear cache"
-            onPress={handleClearCache}
-            colors={colors}
-          />
+
           <SettingItem
             icon="help-circle-outline"
             title="FAQ"
