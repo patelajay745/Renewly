@@ -148,7 +148,7 @@ const CustomTabBar = ({state, navigation}: any) => {
 const styles = StyleSheet.create({
   tabBarContainer: {
     position: "absolute",
-    bottom: 0,
+    bottom: Platform.OS === "ios" ? 0 : 10,
     left: 0,
     right: 0,
     flexDirection: "row",

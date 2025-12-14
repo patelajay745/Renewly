@@ -2,46 +2,120 @@ import {useAppTheme} from "@/providers/ThemeProvider";
 import {RecentSubscription} from "@/types/dashboard";
 import {useRouter} from "expo-router";
 import {FC} from "react";
-import {View, StyleSheet, TouchableOpacity} from "react-native";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  Platform,
+} from "react-native";
 import {Text} from "./text";
-import {Calendar} from "lucide-react-native";
-import {capitalizeString} from "@/lib/common";
+import {Bell, Calendar, Grid3X3, Trash2} from "lucide-react-native";
+import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+import {GestureHandlerRootView} from "react-native-gesture-handler";
+import Reanimated, {
+  SharedValue,
+  useAnimatedStyle,
+} from "react-native-reanimated";
+import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+import {useDeleteSubscription} from "@/hooks/api/use-subscription";
 
 interface Props extends RecentSubscription {}
 
-const SubscriptionCard: FC<Props> = ({
-  id,
-  title,
-  amount,
-  type,
-  notification,
-  category,
-  startDate,
-}) => {
+const SubscriptionCard: FC<Props> = (props) => {
   const {colors} = useAppTheme();
   const router = useRouter();
+  const {mutate: deleteSubscription, isPending} = useDeleteSubscription();
+
   return (
-    <TouchableOpacity
-      style={[styles.card, {backgroundColor: colors.card}]}
-      onPress={() => router.push(`/edit-subscription/${id}`)}
-      activeOpacity={0.7}
-    >
-      <View style={styles.cardHeader}>
-        <Text style={[styles.title]}>{title}</Text>
-        <Text style={[styles.amount]}>${amount.toFixed(2)}</Text>
-      </View>
-      <View style={styles.cardDetails}>
-        <View style={styles.detailRow}>
-          <Calendar color={colors.textMuted} size={16} />
-          <Text style={styles.detailText} muted>
-            {type}
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
+    <GestureHandlerRootView>
+      <ReanimatedSwipeable
+        friction={3}
+        enableTrackpadTwoFingerGesture
+        rightThreshold={1}
+        renderRightActions={(prog, drag) =>
+          RightAction(prog, drag, props, deleteSubscription)
+        }
+      >
+        <TouchableOpacity
+          style={[styles.card, {backgroundColor: colors.card}]}
+          onPress={() => router.push(`/edit-subscription/${props.id}`)}
+          activeOpacity={0.7}
+        >
+          <View style={styles.cardHeader}>
+            <Text style={[styles.title]}>{props.title}</Text>
+            <Text style={[styles.amount]}>${props.amount.toFixed(2)}</Text>
+          </View>
+          <View style={styles.cardDetails}>
+            <View style={styles.detailRow}>
+              <Calendar color={colors.textMuted} size={16} />
+              <Text style={styles.detailText} muted>
+                {props.type}
+              </Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Grid3X3 color={colors.textMuted} size={16} />
+              <Text style={styles.detailText} muted>
+                {props.category.replaceAll("_", " ")}
+              </Text>
+            </View>
+
+            {props.notification && <Bell color={colors.success} size={14} />}
+          </View>
+        </TouchableOpacity>
+      </ReanimatedSwipeable>
+    </GestureHandlerRootView>
   );
 };
 
+function RightAction(
+  prog: SharedValue<number>,
+  drag: SharedValue<number>,
+  subscription: RecentSubscription,
+  deleteSubscription: (id: string) => void
+) {
+  const {colors} = useAppTheme();
+  const styleAnimation = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {translateX: drag.value + Platform.OS === "android" ? 80 : 10},
+      ],
+    };
+  });
+
+  const handleDelete = () => {
+    Alert.alert(
+      "Delete Subscription",
+      `Are you sure you want to delete "${subscription.title}"?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            deleteSubscription(subscription.id);
+          },
+        },
+      ]
+    );
+  };
+
+  return (
+    <Reanimated.View style={styleAnimation}>
+      <TouchableOpacity
+        style={[styles.deleteButton, {backgroundColor: colors.card}]}
+        onPress={handleDelete}
+        activeOpacity={0.7}
+      >
+        <Trash2 color={colors.text} size={22} strokeWidth={2.5} />
+        <Text style={styles.deleteText}>Delete</Text>
+      </TouchableOpacity>
+    </Reanimated.View>
+  );
+}
 const styles = StyleSheet.create({
   card: {
     borderRadius: 12,
@@ -57,6 +131,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 12,
+    alignItems: "center",
   },
   title: {
     fontSize: 16,
@@ -74,6 +149,19 @@ const styles = StyleSheet.create({
   detailText: {
     fontSize: 14,
     textTransform: "capitalize",
+  },
+  deleteButton: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: "auto",
+    height: "100%",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+  },
+  deleteText: {
+    fontSize: 13,
+    marginTop: 6,
+    letterSpacing: 0.3,
   },
 });
 

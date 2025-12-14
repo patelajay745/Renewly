@@ -1,4 +1,3 @@
-// theme.ts
 import { DefaultTheme, DarkTheme, Theme } from '@react-navigation/native';
 
 export const lightColors = {
@@ -46,6 +45,8 @@ export const lightColors = {
     // Disabled state
     disabled: '#C7C7CC',
     disabledText: '#8E8E93',
+    white: '#fff',
+    black: '#000'
 };
 
 export const darkColors = {
@@ -93,6 +94,8 @@ export const darkColors = {
     // Disabled state
     disabled: '#48484A',
     disabledText: '#636366',
+    white: '#fff',
+    black: '#000'
 };
 
 export const lightTheme: Theme = {
@@ -142,6 +145,8 @@ export const semanticColors = {
         shadow: lightColors.shadow,
         disabled: lightColors.disabled,
         disabledText: lightColors.disabledText,
+        white: lightColors.white,
+        black: lightColors.black
     },
     dark: {
         background: darkColors.background,
@@ -173,5 +178,7 @@ export const semanticColors = {
         shadow: darkColors.shadow,
         disabled: darkColors.disabled,
         disabledText: darkColors.disabledText,
+        white: lightColors.white,
+        black: lightColors.black
     },
 };
