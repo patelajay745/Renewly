@@ -1,23 +1,49 @@
 import Header from "@/components/header";
-import NextPayments from "@/components/nextPayments";
-import RecentSubscriptions from "@/components/recentSubscriptions";
 import StatsCard from "@/components/stateCard";
+import SubscriptionList from "@/components/subscription-list";
 import {Text} from "@/components/text";
 
 import {useGetDashboardStats} from "@/hooks/api/use-dashboard";
 import {useAppTheme} from "@/providers/ThemeProvider";
 import {useUser} from "@clerk/clerk-expo";
-import {FlatList, Platform, StyleSheet, View} from "react-native";
+import {StatusBar} from "expo-status-bar";
+import {TriangleAlert} from "lucide-react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Platform,
+  StyleSheet,
+  View,
+} from "react-native";
 
 export default function Page() {
   const {colors} = useAppTheme();
   const {user} = useUser();
-  const {data, isLoading, refetch} = useGetDashboardStats();
+  const {data, isLoading, refetch, error} = useGetDashboardStats();
 
-  if (isLoading)
+  if (isLoading) {
     return (
-      <Text style={[styles.loadingText, {color: colors.text}]}>Loading...</Text>
+      <View
+        style={[styles.centerContainer, {backgroundColor: colors.background}]}
+      >
+        <ActivityIndicator size={"large"} color={colors.foreground} />
+        <Text style={{color: colors.text}}>Loading Subscriptions</Text>
+      </View>
     );
+  }
+
+  if (error || !data) {
+    return (
+      <View
+        style={[styles.centerContainer, {backgroundColor: colors.background}]}
+      >
+        <TriangleAlert color={colors.error} />
+        <Text style={[styles.errorText, {color: colors.error}]}>
+          Error loading subscriptions
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, {backgroundColor: colors.background}]}>
@@ -26,7 +52,10 @@ export default function Page() {
       <FlatList
         data={[1]}
         renderItem={() => (
-          <>{data && <RecentSubscriptions data={data.recentSubscriptions} />}</>
+          <SubscriptionList
+            data={data.recentSubscriptions}
+            title="Recent Subscriptions"
+          />
         )}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -36,8 +65,11 @@ export default function Page() {
               Welcome, {user?.firstName}
             </Text>
 
-            {data && <StatsCard data={data} />}
-            {data && <NextPayments data={data.nextPayments} />}
+            <StatsCard data={data} />
+            <SubscriptionList
+              data={data.nextPayments}
+              title="Upcoming Payments"
+            />
           </>
         )}
         onRefresh={refetch}
@@ -48,6 +80,15 @@ export default function Page() {
 }
 
 const styles = StyleSheet.create({
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 5,
+  },
+  errorText: {
+    fontSize: 16,
+  },
   container: {
     flex: 1,
   },

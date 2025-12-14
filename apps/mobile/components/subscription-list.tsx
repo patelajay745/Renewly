@@ -1,45 +1,30 @@
-import {View, StyleSheet, FlatList} from "react-native";
 import {RecentSubscription} from "@/types/dashboard";
+import {FC} from "react";
+import {View, StyleSheet, FlatList} from "react-native";
+import {NextPayment} from "@/types/dashboard";
 import {useAppTheme} from "@/providers/ThemeProvider";
 import {Text} from "./text";
+import PaymentItemCard from "./payment-item-card";
 
 interface Props {
-  data: RecentSubscription[];
+  data: (RecentSubscription | NextPayment)[];
+  title: string;
 }
 
-export default function RecentSubscriptions({data}: Props) {
+const SubscriptionList: FC<Props> = ({data, title}) => {
   const {colors} = useAppTheme();
 
   if (!data.length) return null;
 
   return (
     <View style={[styles.card, {backgroundColor: colors.card}]}>
-      <Text style={[styles.title, {color: colors.text}]}>
-        Recent Subscriptions
-      </Text>
+      <Text style={[styles.title]}>{title}</Text>
 
       <FlatList
         data={data}
         keyExtractor={(item) => item.id}
         scrollEnabled={false}
-        renderItem={({item}) => (
-          <View style={[styles.row]}>
-            <View>
-              <Text style={[styles.mainText, {color: colors.text}]}>
-                {item.title}
-              </Text>
-
-              <Text style={[styles.category, {color: colors.textMuted}]}>
-                {item.category.charAt(0).toUpperCase() +
-                  item.category.slice(1).replaceAll("_", " ")}
-              </Text>
-            </View>
-
-            <Text style={[styles.amount, {color: colors.accent}]}>
-              $ {item.amount}
-            </Text>
-          </View>
-        )}
+        renderItem={({item}) => <PaymentItemCard {...item} />}
         ItemSeparatorComponent={() => (
           <View
             style={[styles.separator, {backgroundColor: colors.borderMuted}]}
@@ -48,7 +33,7 @@ export default function RecentSubscriptions({data}: Props) {
       />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   card: {
@@ -69,10 +54,13 @@ const styles = StyleSheet.create({
   mainText: {
     fontSize: 16,
     fontWeight: "500",
+    textTransform: "capitalize",
+    flex: 1,
   },
   category: {
     fontSize: 13,
     fontWeight: "400",
+    textTransform: "capitalize",
   },
   amount: {
     fontSize: 17,
@@ -83,3 +71,5 @@ const styles = StyleSheet.create({
     opacity: 0.3,
   },
 });
+
+export default SubscriptionList;
