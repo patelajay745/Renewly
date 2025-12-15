@@ -64,7 +64,6 @@ export default function Page() {
             <Text style={[styles.heading, {color: colors.text}]}>
               Welcome, {user?.firstName}
             </Text>
-
             <StatsCard data={data} />
             <SubscriptionList
               data={data.nextPayments}

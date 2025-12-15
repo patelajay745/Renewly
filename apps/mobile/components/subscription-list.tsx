@@ -14,23 +14,29 @@ interface Props {
 const SubscriptionList: FC<Props> = ({data, title}) => {
   const {colors} = useAppTheme();
 
-  if (!data.length) return null;
-
   return (
     <View style={[styles.card, {backgroundColor: colors.card}]}>
       <Text style={[styles.title]}>{title}</Text>
 
-      <FlatList
-        data={data}
-        keyExtractor={(item) => item.id}
-        scrollEnabled={false}
-        renderItem={({item}) => <PaymentItemCard {...item} />}
-        ItemSeparatorComponent={() => (
-          <View
-            style={[styles.separator, {backgroundColor: colors.borderMuted}]}
-          />
-        )}
-      />
+      {!data.length ? (
+        <View style={styles.emptyState}>
+          <Text style={[styles.emptyText, {color: colors.textMuted}]}>
+            No subscriptions found
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={data}
+          keyExtractor={(item) => item.id}
+          scrollEnabled={false}
+          renderItem={({item}) => <PaymentItemCard {...item} />}
+          ItemSeparatorComponent={() => (
+            <View
+              style={[styles.separator, {backgroundColor: colors.borderMuted}]}
+            />
+          )}
+        />
+      )}
     </View>
   );
 };
@@ -69,6 +75,15 @@ const styles = StyleSheet.create({
   separator: {
     height: 1,
     opacity: 0.3,
+  },
+  emptyState: {
+    paddingVertical: 32,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyText: {
+    fontSize: 15,
+    fontWeight: "400",
   },
 });
 

@@ -10,6 +10,8 @@ interface CreateSubscriptionData extends SubscriptionFormData {
 export const useCreateSubscription = () => {
 
     const api = useApi();
+    const queryClient = useQueryClient();
+
     return useMutation({
         mutationFn: async (formData: CreateSubscriptionData) => {
             try {
@@ -23,7 +25,14 @@ export const useCreateSubscription = () => {
                 console.log("Error while creating a subscription", error)
                 throw error
             }
-        }
+        },
+        onSuccess: async () => {
+            // Invalidate and refetch queries to update UI immediately
+            await queryClient.invalidateQueries({ queryKey: ["allSubscriptions"] });
+            await queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+            await queryClient.refetchQueries({ queryKey: ["allSubscriptions"] });
+            await queryClient.refetchQueries({ queryKey: ["dashboardStats"] });
+        },
     })
 }
 
@@ -58,10 +67,12 @@ export const useDeleteSubscription = () => {
                 throw error;
             }
         },
-        onSuccess: () => {
-            // Invalidate and refetch
-            queryClient.invalidateQueries({ queryKey: ["allSubscriptions"] });
-            queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+        onSuccess: async () => {
+            // Invalidate and refetch queries
+            await queryClient.invalidateQueries({ queryKey: ["allSubscriptions"] });
+            await queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+            // Force refetch to ensure UI updates
+            await queryClient.refetchQueries({ queryKey: ["allSubscriptions"] });
         },
     });
 };
@@ -81,10 +92,12 @@ export const useUpdateSubscription = () => {
                 throw error;
             }
         },
-        onSuccess: () => {
-            // Invalidate and refetch
-            queryClient.invalidateQueries({ queryKey: ["allSubscriptions"] });
-            queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+        onSuccess: async () => {
+            // Invalidate and refetch queries to update UI immediately
+            await queryClient.invalidateQueries({ queryKey: ["allSubscriptions"] });
+            await queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+            await queryClient.refetchQueries({ queryKey: ["allSubscriptions"] });
+            await queryClient.refetchQueries({ queryKey: ["dashboardStats"] });
         },
     });
 };

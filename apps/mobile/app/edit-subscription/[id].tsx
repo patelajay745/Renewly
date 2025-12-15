@@ -1,67 +1,71 @@
-import Header from "@/components/header";
-import {FC, useEffect, useState, useRef} from "react";
+import CustomPicker, {PickerOption} from "@/components/custom-picker";
+import {Text} from "@/components/text";
+import {TextInput} from "@/components/text-input";
+import {
+  useGetSubscription,
+  useUpdateSubscription,
+} from "@/hooks/api/use-subscription";
+import {getExpoNotificationToken} from "@/lib/expo-notification-token";
+import {useAppTheme} from "@/providers/ThemeProvider";
+import {subscriptionSchema} from "@/schemas/create-subscription";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {useLocalSearchParams, useRouter} from "expo-router";
+import {AlertCircle, Check} from "lucide-react-native";
+import {FC, useEffect, useState} from "react";
+import {Controller, useForm} from "react-hook-form";
 import {
   View,
   StyleSheet,
-  Platform,
+  TouchableOpacity,
   FlatList,
   Switch,
-  TouchableOpacity,
   Alert,
+  Platform,
   Linking,
 } from "react-native";
-import {Text} from "@/components/text";
-import {TextInput} from "@/components/text-input";
-import {useAppTheme} from "@/providers/ThemeProvider";
-import CustomPicker, {PickerOption} from "@/components/custom-picker";
-import {Controller, useForm} from "react-hook-form";
-import {subscriptionSchema} from "@/schemas/create-subscription";
-import {z} from "zod";
-import {zodResolver} from "@hookform/resolvers/zod";
+import z from "zod";
+import {categoryOptions, typeOptions} from "../(home)/create-subscription";
 import DatePicker from "@/components/date-picker";
-import {useCreateSubscription} from "@/hooks/api/use-subscription";
-import {Check} from "lucide-react-native";
 import Loader from "@/components/loader";
-import {useRouter} from "expo-router";
-import {getExpoNotificationToken} from "@/lib/expo-notification-token";
 
 interface Props {}
 
 export type SubscriptionFormData = z.infer<typeof subscriptionSchema>;
 
-export const typeOptions: PickerOption[] = [
-  {label: "Daily", value: "daily"},
-  {label: "Weekly", value: "weekly"},
-  {label: "Monthly", value: "monthly"},
-  {label: "Yearly", value: "yearly"},
-];
-
-export const categoryOptions: PickerOption[] = [
-  {label: "Entertainment", value: "entertainment"},
-  {label: "Utilities", value: "utilities"},
-  {label: "Software", value: "software"},
-  {label: "Health & Fitness", value: "health_fitness"},
-  {label: "Education", value: "education"},
-  {label: "Food & Drink", value: "food_drink"},
-  {label: "Transportation", value: "transportation"},
-  {label: "Other", value: "other"},
-];
-
-const CreateSubscription: FC<Props> = (props) => {
-  const [notificationError, setNotificationError] = useState<string>("");
-  const [isSuccessful, setIsSuccessful] = useState<boolean>(false);
+const EditSubscription: FC<Props> = (props) => {
   const [expoPushToken, setExpoPushToken] = useState<string>("");
-  const [notificationGranted, setNotificationGranted] =
+  const [notificationPermissionGranted, setnotificationPermissionGranted] =
     useState<boolean>(false);
+  const [notificationError, setNotificationError] = useState<string>("");
   const {colors} = useAppTheme();
   const router = useRouter();
+  const {id, subscriptionData} = useLocalSearchParams<{
+    id: string;
+    subscriptionData?: string;
+  }>();
 
-  const {mutate, isPending, isSuccess} = useCreateSubscription();
+  const [isSuccessful, setIsSuccessful] = useState<boolean>(false);
+
+  const subscription = subscriptionData ? JSON.parse(subscriptionData) : null;
+  const {mutate, isPending, isSuccess} = useUpdateSubscription();
+
+  useEffect(() => {
+    const initializeNotifications = async () => {
+      const result = await getExpoNotificationToken();
+
+      if (result) {
+        setExpoPushToken(result.token);
+        setnotificationPermissionGranted(result.notificationGranted);
+      }
+    };
+
+    initializeNotifications();
+  }, []);
 
   const {
     handleSubmit,
     control,
-    formState: {errors, isDirty, isValid},
+    formState: {errors, isValid},
     reset,
   } = useForm<SubscriptionFormData>({
     mode: "onChange",
@@ -76,72 +80,99 @@ const CreateSubscription: FC<Props> = (props) => {
     },
   });
 
-  useEffect(() => {
-    const initializeNotifications = async () => {
-      const result = await getExpoNotificationToken();
-      if (result) {
-        setExpoPushToken(result.token);
-        setNotificationGranted(result.notificationGranted);
-      }
+  const onSubmit = (data: SubscriptionFormData) => {
+    if (!id) return;
+
+    const dataTobeSubmitted = {
+      ...data,
+      expoToken: expoPushToken || subscription?.expoToken || "",
     };
 
-    initializeNotifications();
-  }, []);
-
-  let token: string;
-
-  const onSubmit = (data: SubscriptionFormData) => {
-    if (!expoPushToken) return;
-
-    const dataTobeSubmitted = {...data, expoToken: expoPushToken};
-
-    mutate(dataTobeSubmitted, {
-      onSuccess: () => {
-        setIsSuccessful(true);
-
-        reset();
-
-        setTimeout(() => {
-          router.push("/");
-        }, 2000);
-      },
-      onError: (error) => {
-        Alert.alert(
-          "Error",
-          "Failed to create subscription. Please try again.",
-          [{text: "OK"}]
-        );
-        console.error("Subscription creation error:", error);
-      },
-    });
+    mutate(
+      {id, data: dataTobeSubmitted},
+      {
+        onSuccess: () => {
+          setIsSuccessful(true);
+          Alert.alert("Success", "Subscription updated successfully", [
+            {
+              text: "OK",
+              onPress: () => {
+                router.back();
+              },
+            },
+          ]);
+        },
+        onError: (error) => {
+          Alert.alert(
+            "Error",
+            "Failed to update subscription. Please try again.",
+            [{text: "OK"}]
+          );
+          console.error("Subscription update error:", error);
+        },
+      }
+    );
   };
+
+  useEffect(() => {
+    if (subscription) {
+      reset({
+        title: subscription.title,
+        amount: subscription.amount,
+        type: subscription.type,
+        notification: subscription.notification,
+        category: subscription.category,
+        startDate: new Date(subscription.startDate),
+      });
+    }
+
+    console.log("category=>", subscription.category);
+  }, [subscription]);
+
+  if (!subscription) {
+    return (
+      <View
+        style={[styles.loadingContainer, {backgroundColor: colors.background}]}
+      >
+        <AlertCircle size={48} color={colors.error} />
+        <Text style={[styles.loadingText, {color: colors.error}]}>
+          Subscription not found
+        </Text>
+        <TouchableOpacity
+          style={[styles.backButton, {backgroundColor: colors.primary}]}
+          onPress={() => router.back()}
+        >
+          <Text style={[styles.backButtonText, {color: colors.foregroundText}]}>
+            Go Back
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.container, {backgroundColor: colors.background}]}>
-      <Header showHeaderContent={false} />
-
       <FlatList
         data={[1]}
+        ListHeaderComponentStyle={{marginBottom: 20}}
+        contentContainerStyle={{paddingHorizontal: 10, marginTop: 20}}
         renderItem={() => (
           <View style={styles.inputView}>
             <View style={styles.inputContainer}>
-              <Text style={[styles.inputText, {color: colors.text}]}>
-                Title
-              </Text>
-
+              <Text style={styles.inputText}> Title</Text>
               <Controller
                 control={control}
                 name="title"
-                render={({field: {onChange, onBlur, value}}) => (
+                render={({field: {onBlur, onChange, value}}) => (
                   <TextInput
                     placeholder="NetFlix, Spotify, etc."
-                    placeholderTextColor={`${colors.inputPlaceholder}`}
+                    placeholderTextColor={colors.inputPlaceholder}
                     style={[
                       styles.textInput,
                       {
                         backgroundColor: colors.inputBackground,
                         borderColor: colors.inputBorder,
                       },
-                      {color: colors.text},
                     ]}
                     onBlur={onBlur}
                     onChangeText={onChange}
@@ -149,6 +180,7 @@ const CreateSubscription: FC<Props> = (props) => {
                   />
                 )}
               />
+
               {errors.title && (
                 <Text style={{color: "red", fontSize: 12}}>
                   {errors.title.message}
@@ -157,51 +189,31 @@ const CreateSubscription: FC<Props> = (props) => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={[styles.inputText, {color: colors.text}]}>
-                Amount
-              </Text>
+              <Text style={styles.inputText}> Amount</Text>
               <Controller
                 control={control}
                 name="amount"
-                render={({field: {onChange, onBlur, value}}) => {
-                  const [displayValue, setDisplayValue] = useState(
-                    value === 0 ? "" : value.toString()
-                  );
-
-                  return (
-                    <TextInput
-                      placeholder="0.0"
-                      style={[
-                        styles.textInput,
-                        {
-                          backgroundColor: colors.inputBackground,
-                          borderColor: colors.inputBorder,
-                        },
-                        {color: colors.text},
-                      ]}
-                      onBlur={() => {
-                        onBlur();
-                        const numValue =
-                          displayValue === ""
-                            ? 0
-                            : parseFloat(displayValue) || 0;
-                        onChange(numValue);
-                      }}
-                      onChangeText={(text) => {
-                        if (text === "" || /^\d*\.?\d*$/.test(text)) {
-                          setDisplayValue(text);
-
-                          const numValue =
-                            text === "" ? 0 : parseFloat(text) || 0;
-                          onChange(numValue);
-                        }
-                      }}
-                      value={displayValue}
-                      keyboardType="decimal-pad"
-                    />
-                  );
-                }}
+                render={({field: {onBlur, onChange, value}}) => (
+                  <TextInput
+                    placeholder="0.0"
+                    placeholderTextColor={colors.inputPlaceholder}
+                    style={[
+                      styles.textInput,
+                      {
+                        backgroundColor: colors.inputBackground,
+                        borderColor: colors.inputBorder,
+                      },
+                    ]}
+                    onBlur={onBlur}
+                    onChangeText={(text) => {
+                      onChange(+text);
+                    }}
+                    value={value.toString()}
+                    keyboardType="numeric"
+                  />
+                )}
               />
+
               {errors.amount && (
                 <Text style={{color: "red", fontSize: 12}}>
                   {errors.amount.message}
@@ -210,12 +222,11 @@ const CreateSubscription: FC<Props> = (props) => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={[styles.inputText, {color: colors.text}]}>Type</Text>
-
+              <Text style={styles.inputText}> Type</Text>
               <Controller
                 control={control}
                 name="type"
-                render={({field: {onChange, onBlur, value}}) => (
+                render={({field: {onBlur, onChange, value}}) => (
                   <CustomPicker
                     options={typeOptions}
                     selectedValue={value}
@@ -224,6 +235,7 @@ const CreateSubscription: FC<Props> = (props) => {
                   />
                 )}
               />
+
               {errors.type && (
                 <Text style={{color: "red", fontSize: 12}}>
                   {errors.type.message}
@@ -232,22 +244,23 @@ const CreateSubscription: FC<Props> = (props) => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={[styles.inputText, {color: colors.text}]}>
-                Category
-              </Text>
-
+              <Text style={styles.inputText}> Category</Text>
               <Controller
                 control={control}
                 name="category"
-                render={({field: {onChange, onBlur, value}}) => (
-                  <CustomPicker
-                    options={categoryOptions}
-                    selectedValue={value}
-                    onValueChange={onChange}
-                    placeholder="Select Category"
-                  />
-                )}
+                render={({field: {onBlur, onChange, value}}) => {
+                  console.log("Value=>", value);
+                  return (
+                    <CustomPicker
+                      options={categoryOptions}
+                      selectedValue={value}
+                      onValueChange={onChange}
+                      placeholder="Select Category"
+                    />
+                  );
+                }}
               />
+
               {errors.category && (
                 <Text style={{color: "red", fontSize: 12}}>
                   {errors.category.message}
@@ -256,14 +269,11 @@ const CreateSubscription: FC<Props> = (props) => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={[styles.inputText, {color: colors.text}]}>
-                Start Date
-              </Text>
-
+              <Text style={styles.inputText}> Start Date</Text>
               <Controller
                 control={control}
                 name="startDate"
-                render={({field: {onChange, onBlur, value}}) => (
+                render={({field: {onBlur, onChange, value}}) => (
                   <DatePicker
                     placeholder="Choose a date"
                     value={value}
@@ -273,6 +283,12 @@ const CreateSubscription: FC<Props> = (props) => {
                   />
                 )}
               />
+
+              {errors.title && (
+                <Text style={{color: "red", fontSize: 12}}>
+                  {errors.title.message}
+                </Text>
+              )}
             </View>
 
             <View
@@ -289,7 +305,7 @@ const CreateSubscription: FC<Props> = (props) => {
                 <Text style={[styles.inputText, {color: colors.text}]}>
                   Notification
                 </Text>
-                {!notificationGranted && (
+                {!notificationPermissionGranted && (
                   <Text
                     style={{
                       color: colors.textSecondary,
@@ -309,7 +325,7 @@ const CreateSubscription: FC<Props> = (props) => {
                   <Switch
                     value={value}
                     onValueChange={(newValue) => {
-                      if (newValue && !notificationGranted) {
+                      if (newValue && !notificationPermissionGranted) {
                         setNotificationError(
                           "Notification permission is required"
                         );
@@ -373,7 +389,7 @@ const CreateSubscription: FC<Props> = (props) => {
                       {color: colors.foregroundText},
                     ]}
                   >
-                    Creating subscription
+                    Updating subscription
                   </Text>
                   <Loader />
                 </>
@@ -385,7 +401,7 @@ const CreateSubscription: FC<Props> = (props) => {
                       {color: colors.foregroundText},
                     ]}
                   >
-                    Subscription created
+                    Subscription updated
                   </Text>
                   <Check size={24} color={colors.foregroundText} />
                 </>
@@ -396,52 +412,50 @@ const CreateSubscription: FC<Props> = (props) => {
                     {color: colors.foregroundText},
                   ]}
                 >
-                  Create Subscription
+                  Update Subscription
                 </Text>
               )}
             </TouchableOpacity>
           );
         }}
-        ListHeaderComponent={() => (
-          <Text
-            style={[styles.screenTitle, {color: colors.text}]}
-            variant="title"
-          >
-            Create Subscription
-          </Text>
-        )}
-        contentContainerStyle={{paddingHorizontal: 10, marginTop: 20}}
-        ListHeaderComponentStyle={{marginBottom: 20}}
       />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 16,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  backButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 16,
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
   container: {
     flex: 1,
-  },
-  contentContainer: {
-    flex: 1,
-    padding: 10,
-    gap: 26,
-  },
-  tokenText: {
-    fontSize: 12,
-    color: "#666",
-    marginTop: 10,
-  },
-  screenTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
   },
   inputView: {
     paddingHorizontal: 10,
     gap: 20,
   },
+  inputContainer: {
+    gap: 5,
+  },
   inputText: {
     fontSize: 16,
-    fontWeight: "500",
   },
   textInput: {
     height: 50,
@@ -449,9 +463,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     fontSize: 16,
-  },
-  inputContainer: {
-    gap: 5,
   },
   submitButton: {
     height: 56,
@@ -462,6 +473,7 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 32,
   },
-  submitButtonText: {fontSize: 18, fontWeight: "600"},
+  submitButtonText: {fontSize: 18},
 });
-export default CreateSubscription;
+
+export default EditSubscription;

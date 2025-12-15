@@ -465,7 +465,7 @@ const DatePicker: FC<Props> = ({
                 onPress={handleSelect}
                 style={[styles.button, {backgroundColor: colors.primary}]}
               >
-                <Text>Select</Text>
+                <Text style={{color: colors.background}}>Select</Text>
               </TouchableOpacity>
             </View>
           </Animated.View>

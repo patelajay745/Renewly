@@ -1,4 +1,4 @@
-import {Slot} from "expo-router";
+import {Stack} from "expo-router";
 import {ClerkProvider} from "@clerk/clerk-expo";
 import {tokenCache} from "@clerk/clerk-expo/token-cache";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
@@ -32,7 +32,17 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <ClerkProvider tokenCache={tokenCache}>
           <ThemeProvider>
-            <Slot />
+            <Stack screenOptions={{headerShown: false}}>
+              <Stack.Screen name="(auth)" options={{headerShown: false}} />
+              <Stack.Screen name="(home)" options={{headerShown: false}} />
+              <Stack.Screen
+                name="edit-subscription"
+                options={{
+                  presentation: "modal",
+                  headerShown: false,
+                }}
+              />
+            </Stack>
           </ThemeProvider>
         </ClerkProvider>
       </QueryClientProvider>

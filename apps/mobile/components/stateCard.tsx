@@ -24,7 +24,7 @@ export default function StatsCard({data}: {data: DashboardResponse}) {
         <View style={styles.item}>
           <Text style={[styles.label, {color: colors.textMuted}]}>Monthly</Text>
           <Text style={[styles.amount, {color: colors.primary}]}>
-            ${data.stats.totalMonthlySpend}
+            ${data.stats.totalMonthlySpend.toFixed(2)}
           </Text>
         </View>
 
@@ -33,7 +33,7 @@ export default function StatsCard({data}: {data: DashboardResponse}) {
             Yearly Projection
           </Text>
           <Text style={[styles.amount, {color: colors.primary}]}>
-            ${data.stats.totalYearlyProjection}
+            ${data.stats.totalYearlyProjection.toFixed(2)}
           </Text>
         </View>
       </View>

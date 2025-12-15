@@ -221,8 +221,6 @@ const EditSubscription: FC<Props> = (props) => {
 
   return (
     <View style={[styles.container, {backgroundColor: colors.background}]}>
-      <Header title="Edit Subscription" />
-
       <FlatList
         data={[1]}
         renderItem={() => (

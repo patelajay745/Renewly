@@ -1,7 +1,7 @@
 import {useAppTheme} from "@/providers/ThemeProvider";
 import {RecentSubscription} from "@/types/dashboard";
 import {useRouter} from "expo-router";
-import {FC} from "react";
+import {FC, useRef} from "react";
 import {
   View,
   StyleSheet,
@@ -26,20 +26,70 @@ const SubscriptionCard: FC<Props> = (props) => {
   const {colors} = useAppTheme();
   const router = useRouter();
   const {mutate: deleteSubscription, isPending} = useDeleteSubscription();
+  const swipeableRef = useRef<any>(null);
+
+  const pathname = `/edit-subscription/${props.id}`;
+
+  const handleDelete = (subscriptionId: string, title: string) => {
+    Alert.alert(
+      "Delete Subscription",
+      `Are you sure you want to delete "${title}"?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+          onPress: () => {
+            // Close the swipeable when cancelled
+            swipeableRef.current?.close();
+          },
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            deleteSubscription(subscriptionId, {
+              onSuccess: () => {
+                // Close the swipeable after successful deletion
+                swipeableRef.current?.close();
+              },
+              onError: (error) => {
+                Alert.alert(
+                  "Error",
+                  "Failed to delete subscription. Please try again."
+                );
+                console.error("Delete error:", error);
+                // Close the swipeable on error too
+                swipeableRef.current?.close();
+              },
+            });
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <GestureHandlerRootView>
       <ReanimatedSwipeable
+        ref={swipeableRef}
         friction={3}
         enableTrackpadTwoFingerGesture
         rightThreshold={1}
         renderRightActions={(prog, drag) =>
-          RightAction(prog, drag, props, deleteSubscription)
+          RightAction(prog, drag, props, handleDelete, isPending)
         }
       >
         <TouchableOpacity
           style={[styles.card, {backgroundColor: colors.card}]}
-          onPress={() => router.push(`/edit-subscription/${props.id}`)}
+          onPress={() =>
+            router.push({
+              pathname: `/edit-subscription/[id]`,
+              params: {
+                id: props.id,
+                subscriptionData: JSON.stringify(props),
+              },
+            })
+          }
           activeOpacity={0.7}
         >
           <View style={styles.cardHeader}>
@@ -72,7 +122,8 @@ function RightAction(
   prog: SharedValue<number>,
   drag: SharedValue<number>,
   subscription: RecentSubscription,
-  deleteSubscription: (id: string) => void
+  handleDelete: (id: string, title: string) => void,
+  isPending: boolean
 ) {
   const {colors} = useAppTheme();
   const styleAnimation = useAnimatedStyle(() => {
@@ -83,35 +134,18 @@ function RightAction(
     };
   });
 
-  const handleDelete = () => {
-    Alert.alert(
-      "Delete Subscription",
-      `Are you sure you want to delete "${subscription.title}"?`,
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            deleteSubscription(subscription.id);
-          },
-        },
-      ]
-    );
-  };
-
   return (
     <Reanimated.View style={styleAnimation}>
       <TouchableOpacity
         style={[styles.deleteButton, {backgroundColor: colors.card}]}
-        onPress={handleDelete}
+        onPress={() => handleDelete(subscription.id, subscription.title)}
         activeOpacity={0.7}
+        disabled={isPending}
       >
         <Trash2 color={colors.text} size={22} strokeWidth={2.5} />
-        <Text style={styles.deleteText}>Delete</Text>
+        <Text style={styles.deleteText}>
+          {isPending ? "Deleting..." : "Delete"}
+        </Text>
       </TouchableOpacity>
     </Reanimated.View>
   );
