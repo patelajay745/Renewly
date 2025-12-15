@@ -54,7 +54,7 @@ export class DashboardService {
       .select([
         `LOWER(TRIM(s."clerkUserId")) AS "normalizedId"`,
         `COUNT(*)::int AS "subscriptionCount"`,
-        `SUM(CASE WHEN s.notifications = true THEN 1 ELSE 0 END)::int AS "notifications"`,
+        `SUM(CASE WHEN s.notification = true THEN 1 ELSE 0 END)::int AS "notifications"`,
       ])
       .groupBy(`s."clerkUserId"`)
       .getRawMany();

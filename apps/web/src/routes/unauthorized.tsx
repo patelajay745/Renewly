@@ -19,15 +19,12 @@ function RouteComponent() {
     <div className="min-h-screen flex items-center justify-center bg-black text-white px-4">
       <div className="max-w-md w-full text-center space-y-6 animate-in fade-in duration-500">
 
-        {/* Icon */}
         <div className="flex justify-center">
           <ShieldAlert className="h-20 w-20 text-red-500 animate-pulse" />
         </div>
 
-        {/* Title */}
         <h1 className="text-4xl font-bold">Access Denied</h1>
 
-        {/* Subtitle */}
         <p className="text-gray-300 text-lg leading-relaxed">
           You do not have permission to view this page.
           <span className="block mt-2 font-semibold text-red-400">
@@ -35,7 +32,7 @@ function RouteComponent() {
           </span>
         </p>
 
-        {/* Buttons */}
+
         <div className="flex flex-col gap-3 pt-2">
           <Link
             to="/"

@@ -1,4 +1,3 @@
-// routes/dashboard/index.tsx
 import { AppSidebar } from "@/components/app-sidebar";
 import DashboardPage from "@/components/DashboardPage";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -29,7 +28,6 @@ export function Dashboard() {
     }
   }, [isLoaded, isSignedIn, user, router]);
 
-  // Show loading state
   if (!isLoaded) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -38,7 +36,6 @@ export function Dashboard() {
     );
   }
 
-  // Don't render dashboard if not authorized
   if (!isSignedIn || user?.publicMetadata?.role !== "ADMIN") {
     return null;
   }

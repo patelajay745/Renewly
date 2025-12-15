@@ -21,7 +21,6 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      {/* TOP USER */}
       <SidebarHeader>
         <div className="flex items-center gap-3 px-2 py-2">
           <UserButton />
@@ -34,7 +33,6 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      {/* MAIN MENU */}
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Main</SidebarGroupLabel>
@@ -53,7 +51,6 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* FOOTER */}
       <SidebarFooter>
         <button
           onClick={() => signOut()}
