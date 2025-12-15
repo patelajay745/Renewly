@@ -1,8 +1,10 @@
+import {useAppTheme} from "@/providers/ThemeProvider";
 import {useClerk} from "@clerk/clerk-expo";
 import * as Linking from "expo-linking";
 import {Text, TouchableOpacity} from "react-native";
 
 export const SignOutButton = () => {
+  const {colors} = useAppTheme();
   // Use `useClerk()` to access the `signOut()` function
   const {signOut} = useClerk();
   const handleSignOut = async () => {
@@ -17,8 +19,16 @@ export const SignOutButton = () => {
     }
   };
   return (
-    <TouchableOpacity onPress={handleSignOut}>
-      <Text>Sign out</Text>
+    <TouchableOpacity
+      onPress={handleSignOut}
+      style={{
+        backgroundColor: colors.foreground,
+        paddingVertical: 10,
+        paddingHorizontal: 10,
+        borderRadius: 10,
+      }}
+    >
+      <Text style={{textAlign: "center"}}>Sign out</Text>
     </TouchableOpacity>
   );
 };

@@ -1,20 +1,15 @@
-import {Tabs} from "expo-router";
-import {
-  HomeIcon,
-  LucideIcon,
-  Search,
-  QrCode,
-  Clock,
-  User,
-  Plus,
-  History,
-  Settings,
-} from "lucide-react-native";
-import {Pressable, Text, View, StyleSheet, Platform} from "react-native";
+import {Redirect, Tabs} from "expo-router";
+import {HomeIcon, Plus, History, Settings} from "lucide-react-native";
+import {Pressable, View, StyleSheet, Platform} from "react-native";
 import {useAppTheme} from "@/providers/ThemeProvider";
+import {useUser} from "@clerk/clerk-expo";
+import {Text} from "@/components/text";
 
 export default function Layout() {
-  const {colors} = useAppTheme();
+  const {isSignedIn} = useUser();
+
+  if (!isSignedIn) return <Redirect href={"/sign-in"} />;
+
   return (
     <Tabs
       screenOptions={{
@@ -27,6 +22,7 @@ export default function Layout() {
           elevation: 0,
           height: 100,
           paddingBottom: Platform.OS === "ios" ? 20 : 10,
+          marginBottom: 200,
         },
       }}
       tabBar={(props) => <CustomTabBar {...props} />}
@@ -41,13 +37,6 @@ export default function Layout() {
         name="create-subscription"
         options={{
           title: "Create",
-        }}
-      />
-
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
         }}
       />
     </Tabs>
@@ -128,9 +117,8 @@ const CustomTabBar = ({state, navigation}: any) => {
             }
           };
 
-          const isProfile = tab.route === "profile";
-          const bgColor = isProfile ? colors.info : colors.surface;
-          const iconColor = isProfile ? colors.foregroundText : colors.text;
+          const bgColor = colors.surface;
+          const iconColor = colors.text;
 
           return (
             <Pressable
@@ -153,7 +141,7 @@ const CustomTabBar = ({state, navigation}: any) => {
 const styles = StyleSheet.create({
   tabBarContainer: {
     position: "absolute",
-    bottom: 0,
+    bottom: Platform.OS === "ios" ? 0 : 10,
     left: 0,
     right: 0,
     flexDirection: "row",

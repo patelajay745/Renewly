@@ -1,15 +1,16 @@
-import { FC } from "react";
+import {FC} from "react";
 import {
   View,
   StyleSheet,
   Platform,
-  Text,
   TouchableOpacity,
   useColorScheme,
 } from "react-native";
 import BackButton from "./back-button";
-import { EditIcon, LinkIcon } from "lucide-react-native";
-import { semanticColors } from "@/constants/theme";
+import {EditIcon, LinkIcon} from "lucide-react-native";
+import {semanticColors} from "@/constants/theme";
+import {useAppTheme} from "@/providers/ThemeProvider";
+import {Text} from "./text";
 
 interface Props {
   title?: string;
@@ -34,15 +35,14 @@ const Header: FC<Props> = ({
       ? 50
       : 30;
 
-  const colorScheme = useColorScheme();
-  const colors = semanticColors[colorScheme ?? "light"];
+  const {colors} = useAppTheme();
 
   return (
     <View
       style={[
         styles.header,
-        { minHeight },
-        showHeaderContent && { paddingBottom: 10 },
+        {minHeight},
+        showHeaderContent && {paddingBottom: 10},
         {
           backgroundColor: colors.background,
           borderBottomColor: `${colors.borderLight}`,
@@ -63,7 +63,7 @@ const Header: FC<Props> = ({
           <BackButton
             style={[
               styles.backButton,
-              ...(!eventDetails ? [{ position: "absolute" as const }] : []),
+              ...(!eventDetails ? [{position: "absolute" as const}] : []),
             ]}
           />
           <Text

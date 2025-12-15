@@ -39,6 +39,10 @@ export class SubscriptionsService {
         throw new HttpException('Something went wrong', 400);
       }
 
+      await this.clearUserSubscriptionsCache(user.id);
+
+      await this.clearDashboardCache(user.id);
+
       return saved;
     } catch (error) {
       this.logger.error(error);
@@ -48,7 +52,7 @@ export class SubscriptionsService {
   async findAll(user: User, query?: any) {
     if (!user) throw new NotFoundException('User not found');
 
-    const cacheKey = this.generateSubscriptionsKey(user.id, query);
+    const cacheKey = this.generateSubscriptionsListKey(user.id, query);
 
     const cached = await this.cache.get(cacheKey);
 
@@ -64,12 +68,12 @@ export class SubscriptionsService {
       skip: query?.page ? (query.page - 1) * (query?.limit || 50) : 0,
     });
 
-    console.log(subscriptions)
-
     if (!subscriptions?.length)
       throw new NotFoundException('No subscriptions found');
 
-    await this.cache.set(cacheKey, subscriptions, 60000);
+    await this.cache.set(cacheKey, subscriptions, 15 * 60 * 1000);
+
+    await this.addCacheKeyToUserTag(user.id, cacheKey);
 
     this.logger.log(`CACHE SET: ${cacheKey}`);
 
@@ -95,7 +99,8 @@ export class SubscriptionsService {
 
       if (!subscription) throw new NotFoundException('Subscription not found');
 
-      await this.cache.set(cacheKey, subscription, 60000);
+      await this.cache.set(cacheKey, subscription, 60 * 60 * 1000);
+
       return subscription;
     } catch (error) {
       this.logger.error(error);
@@ -123,7 +128,6 @@ export class SubscriptionsService {
         );
       }
 
-      // Update only provided fields
       if (updateSubscriptionDto.amount !== undefined) {
         findforUpdate.amount = updateSubscriptionDto.amount;
       }
@@ -132,8 +136,8 @@ export class SubscriptionsService {
         findforUpdate.category = updateSubscriptionDto.category;
       }
 
-      if (updateSubscriptionDto.notifications !== undefined) {
-        findforUpdate.notifications = updateSubscriptionDto.notifications;
+      if (updateSubscriptionDto.notification !== undefined) {
+        findforUpdate.notification = updateSubscriptionDto.notification;
       }
 
       if (updateSubscriptionDto.title !== undefined) {
@@ -144,8 +148,8 @@ export class SubscriptionsService {
         findforUpdate.type = updateSubscriptionDto.type;
       }
 
-      if(updateSubscriptionDto.expoToken!== undefined){
-        findforUpdate.expoToken=updateSubscriptionDto.expoToken
+      if (updateSubscriptionDto.expoToken !== undefined) {
+        findforUpdate.expoToken = updateSubscriptionDto.expoToken
       }
 
       if (updateSubscriptionDto.startDate !== undefined) {
@@ -155,6 +159,10 @@ export class SubscriptionsService {
       const updatedSubscription = await this.subscriptionRepository.save(findforUpdate);
 
       await this.cache.del(`subscriptions:${id}`);
+
+      await this.clearUserSubscriptionsCache(user.id);
+
+      await this.clearDashboardCache(user.id);
 
       return updatedSubscription;
     } catch (error) {
@@ -189,7 +197,11 @@ export class SubscriptionsService {
         clerkUserId: user.id,
       });
 
-      await this.cache.del(`subscription:${id}`);
+      await this.cache.del(`subscriptions:${id}`);
+
+      await this.clearUserSubscriptionsCache(user.id);
+
+      await this.clearDashboardCache(user.id);
 
       return {
         message: 'Subscription deleted successfully',
@@ -200,9 +212,68 @@ export class SubscriptionsService {
     }
   }
 
-  private generateSubscriptionsKey(userId: string, query?: any): string {
-    const key = `subscriptions:user_${userId}:filter_${JSON.stringify(query || {})}`;
-    return key;
+  private generateSubscriptionsListKey(userId: string, query?: any): string {
+    const queryHash = JSON.stringify(query || {});
+    return `subscriptions:list:user_${userId}:${queryHash}`;
+  }
+
+  private getUserCacheTagKey(userId: string): string {
+    return `subscriptions:tag:user_${userId}`;
+  }
+
+  private async addCacheKeyToUserTag(userId: string, cacheKey: string): Promise<void> {
+    try {
+      const tagKey = this.getUserCacheTagKey(userId);
+      const existingKeys = await this.cache.get<string[]>(tagKey) || [];
+
+      if (!existingKeys.includes(cacheKey)) {
+        existingKeys.push(cacheKey);
+
+        await this.cache.set(tagKey, existingKeys, 30 * 60 * 1000);
+      }
+    } catch (error) {
+      this.logger.warn(`Failed to add cache key to tag: ${error.message}`);
+    }
+  }
+
+  private async clearUserSubscriptionsCache(userId: string): Promise<void> {
+    try {
+      const tagKey = this.getUserCacheTagKey(userId);
+      const cacheKeys = await this.cache.get<string[]>(tagKey) || [];
+
+      for (const key of cacheKeys) {
+        await this.cache.del(key);
+        this.logger.log(`CACHE CLEARED: ${key}`);
+      }
+
+      await this.cache.del(tagKey);
+      this.logger.log(`CACHE TAG CLEARED: ${tagKey}`);
+
+      const fallbackPatterns = [
+        `subscriptions:list:user_${userId}:{}`,
+        `subscriptions:list:user_${userId}:{"limit":50}`,
+      ];
+
+      for (const key of fallbackPatterns) {
+        await this.cache.del(key);
+      }
+
+    } catch (error) {
+      this.logger.error(`Error clearing cache for user ${userId}:`, error);
+    }
+  }
+
+  private async clearDashboardCache(userId: string): Promise<void> {
+    try {
+      const userDashboardKey = `dashboard:user:${userId}`;
+      const adminDashboardKey = `dashboard:admin:${userId}`;
+await this.cache.del(userDashboardKey);
+      await this.cache.del(adminDashboardKey);
+
+      this.logger.log(`DASHBOARD CACHE CLEARED for user: ${userId}`);
+    } catch (error) {
+      this.logger.warn(`Failed to clear dashboard cache: ${error.message}`);
+    }
   }
 
 }

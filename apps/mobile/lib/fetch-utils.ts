@@ -1,4 +1,6 @@
 import axios from "axios";
+import * as SecureStore from "expo-secure-store";
+import { router } from "expo-router";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL + "/api/v1";
 
@@ -29,14 +31,34 @@ api.interceptors.response.use(
     console.log("API Response:", response.status, response.config.url);
     return response;
   },
-  (error) => {
+  async (error) => {
     console.error("API Error:", error.message);
     if (error.response) {
-      console.error(
-        "Error Response:",
+      console.error("Error Response:",
         error.response.status,
         error.response.data
       );
+
+      // if (error.response.status === 401) {
+      //   console.log("Unauthorized - logging out user");
+      //   try {
+      //     // Clear all Clerk tokens from SecureStore
+      //     const keys = [
+      //       "__clerk_client_jwt",
+      //       "__clerk_refresh_token",
+      //       "__clerk_session_id",
+      //     ];
+
+      //     await Promise.all(
+      //       keys.map(key => SecureStore.deleteItemAsync(key).catch(() => { }))
+      //     );
+
+      //     // Redirect to sign-in page
+      //     router.replace("/sign-in");
+      //   } catch (logoutError) {
+      //     console.error("Error during logout:", logoutError);
+      //   }
+      // }
     } else if (error.request) {
       console.error("Network Error - No response received");
     }

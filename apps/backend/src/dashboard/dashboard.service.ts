@@ -27,9 +27,8 @@ export class DashboardService {
 
     @Inject(CACHE_MANAGER)
     private readonly cache: Cache,
-  ) {}
+  ) { }
 
-  // ---------- ADMIN DASHBOARD ----------
   async getGlobalDashboard(user: User) {
     const cacheKey = `dashboard:admin:${user.id}`;
 
@@ -102,7 +101,7 @@ export class DashboardService {
         .createQueryBuilder('s')
         .select('COUNT(DISTINCT s.clerkUserId)', 'count')
         .getRawOne(),
-      this.subscriptionRepository.count({ where: { notifications: true } }),
+      this.subscriptionRepository.count({ where: { notification: true } }),
       this.subscriptionRepository
         .createQueryBuilder('s')
         .where('s.expoToken IS NOT NULL')
@@ -139,12 +138,11 @@ export class DashboardService {
       ),
     };
 
-    await this.cache.set(cacheKey, result, 60_000); // 60 sec cache
+    await this.cache.set(cacheKey, result, 15 * 60 * 1000);
 
     return result;
   }
 
-  // ---------- HELPER: Calculate next renewal ----------
   private calculateNextRenewalDate(s: Subscription) {
     const startDate = new Date(s.startDate);
     const today = new Date();
@@ -167,7 +165,6 @@ export class DashboardService {
     return nextRenewal;
   }
 
-  // ---------- USER DASHBOARD ----------
   async getUserDashboard(user: User) {
     const cacheKey = `dashboard:user:${user.id}`;
 
@@ -199,7 +196,7 @@ export class DashboardService {
       .reduce((sum, s) => sum + s.amount, 0);
 
     const notificationsEnabledCount = subscriptions.filter(
-      (s) => s.notifications === true,
+      (s) => s.notification === true,
     ).length;
     const expoTokenRegistered = subscriptions.some((s) => s.expoToken);
 
@@ -229,7 +226,7 @@ export class DashboardService {
       recentSubscriptions: subscriptions.slice(0, 5),
     };
 
-    await this.cache.set(cacheKey, result, 60_000);
+    await this.cache.set(cacheKey, result, 15 * 60 * 1000);
 
     return result;
   }

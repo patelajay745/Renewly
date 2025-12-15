@@ -35,21 +35,7 @@ This project is organized as a **Turborepo monorepo** with the following structu
   - Clerk authentication integration
   - Push notifications with Expo Notifications
 
-### Packages
 
-- **`packages/ui`**: Shared UI component library
-  - Reusable React components (Button, Card, Code, etc.)
-  - Consistent styling across applications
-
-- **`packages/eslint-config`**: Shared ESLint configurations
-  - Base configuration
-  - Next.js specific rules
-  - React internal rules
-
-- **`packages/typescript-config`**: Shared TypeScript configurations
-  - Base TypeScript config
-  - Next.js specific config
-  - React library config
 
 ## 🛠️ Tech Stack
 

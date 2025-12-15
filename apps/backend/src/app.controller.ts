@@ -1,11 +1,11 @@
 import { Controller, Get } from '@nestjs/common';
 import { Protected } from './decorators/protected.decorator';
 
-@Controller()
+@Controller("/")
 export class AppController {
   constructor() { }
 
-  @Get()
+  @Get("/")
   getHello(): string {
     return "Up and Running";
   }
