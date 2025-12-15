@@ -55,9 +55,7 @@ const CustomPicker: FC<Props> = ({
     (option) => option.value === selectedValue
   );
 
-  console.log("selected Value=>", selectedValue);
-  console.log("options=>", options);
-  console.log("selectedOption=>", selectedOption);
+  
 
   const closePicker = () => {
     Animated.timing(slideAnim, {

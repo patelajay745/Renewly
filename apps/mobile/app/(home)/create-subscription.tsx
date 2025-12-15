@@ -51,12 +51,13 @@ const CreateSubscription: FC<Props> = (props) => {
   const [notificationError, setNotificationError] = useState<string>("");
   const [isSuccessful, setIsSuccessful] = useState<boolean>(false);
   const [expoPushToken, setExpoPushToken] = useState<string>("");
+  const [displayValue, setDisplayValue] = useState("");
   const [notificationGranted, setNotificationGranted] =
     useState<boolean>(false);
   const {colors} = useAppTheme();
   const router = useRouter();
 
-  const {mutate, isPending, isSuccess} = useCreateSubscription();
+  const {mutate, isPending} = useCreateSubscription();
 
   const {
     handleSubmit,
@@ -102,6 +103,8 @@ const CreateSubscription: FC<Props> = (props) => {
         reset();
 
         setTimeout(() => {
+          setIsSuccessful(false);
+          setDisplayValue("");
           router.push("/");
         }, 2000);
       },
@@ -164,10 +167,6 @@ const CreateSubscription: FC<Props> = (props) => {
                 control={control}
                 name="amount"
                 render={({field: {onChange, onBlur, value}}) => {
-                  const [displayValue, setDisplayValue] = useState(
-                    value === 0 ? "" : value.toString()
-                  );
-
                   return (
                     <TextInput
                       placeholder="0.0"

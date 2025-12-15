@@ -29,7 +29,6 @@ export class DashboardService {
     private readonly cache: Cache,
   ) { }
 
-  // ---------- ADMIN DASHBOARD ----------
   async getGlobalDashboard(user: User) {
     const cacheKey = `dashboard:admin:${user.id}`;
 
@@ -139,12 +138,11 @@ export class DashboardService {
       ),
     };
 
-    await this.cache.set(cacheKey, result, 60_000); 
+    await this.cache.set(cacheKey, result, 15 * 60 * 1000);
 
     return result;
   }
 
-  // ---------- HELPER: Calculate next renewal ----------
   private calculateNextRenewalDate(s: Subscription) {
     const startDate = new Date(s.startDate);
     const today = new Date();
@@ -167,7 +165,6 @@ export class DashboardService {
     return nextRenewal;
   }
 
-  // ---------- USER DASHBOARD ----------
   async getUserDashboard(user: User) {
     const cacheKey = `dashboard:user:${user.id}`;
 
@@ -229,7 +226,7 @@ export class DashboardService {
       recentSubscriptions: subscriptions.slice(0, 5),
     };
 
-    await this.cache.set(cacheKey, result, 60_000);
+    await this.cache.set(cacheKey, result, 15 * 60 * 1000);
 
     return result;
   }

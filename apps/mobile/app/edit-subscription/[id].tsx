@@ -2,7 +2,6 @@ import CustomPicker, {PickerOption} from "@/components/custom-picker";
 import {Text} from "@/components/text";
 import {TextInput} from "@/components/text-input";
 import {
-  useGetSubscription,
   useUpdateSubscription,
 } from "@/hooks/api/use-subscription";
 import {getExpoNotificationToken} from "@/lib/expo-notification-token";
@@ -37,6 +36,7 @@ const EditSubscription: FC<Props> = (props) => {
   const [notificationPermissionGranted, setnotificationPermissionGranted] =
     useState<boolean>(false);
   const [notificationError, setNotificationError] = useState<string>("");
+  const [amountDisplayValue, setAmountDisplayValue] = useState<string>("");
   const {colors} = useAppTheme();
   const router = useRouter();
   const {id, subscriptionData} = useLocalSearchParams<{
@@ -124,9 +124,11 @@ const EditSubscription: FC<Props> = (props) => {
         category: subscription.category,
         startDate: new Date(subscription.startDate),
       });
+      
+      setAmountDisplayValue(
+        subscription.amount === 0 ? "" : subscription.amount.toString()
+      );
     }
-
-    console.log("category=>", subscription.category);
   }, [subscription]);
 
   if (!subscription) {
@@ -193,25 +195,40 @@ const EditSubscription: FC<Props> = (props) => {
               <Controller
                 control={control}
                 name="amount"
-                render={({field: {onBlur, onChange, value}}) => (
-                  <TextInput
-                    placeholder="0.0"
-                    placeholderTextColor={colors.inputPlaceholder}
-                    style={[
-                      styles.textInput,
-                      {
-                        backgroundColor: colors.inputBackground,
-                        borderColor: colors.inputBorder,
-                      },
-                    ]}
-                    onBlur={onBlur}
-                    onChangeText={(text) => {
-                      onChange(+text);
-                    }}
-                    value={value.toString()}
-                    keyboardType="numeric"
-                  />
-                )}
+                render={({field: {onBlur, onChange, value}}) => {
+                  return (
+                    <TextInput
+                      placeholder="0.0"
+                      placeholderTextColor={colors.inputPlaceholder}
+                      style={[
+                        styles.textInput,
+                        {
+                          backgroundColor: colors.inputBackground,
+                          borderColor: colors.inputBorder,
+                        },
+                      ]}
+                      onBlur={() => {
+                        onBlur();
+                        const numValue =
+                          amountDisplayValue === ""
+                            ? 0
+                            : parseFloat(amountDisplayValue) || 0;
+                        onChange(numValue);
+                      }}
+                      onChangeText={(text) => {
+                        if (text === "" || /^\d*\.?\d*$/.test(text)) {
+                          setAmountDisplayValue(text);
+
+                          const numValue =
+                            text === "" ? 0 : parseFloat(text) || 0;
+                          onChange(numValue);
+                        }
+                      }}
+                      value={amountDisplayValue}
+                      keyboardType="decimal-pad"
+                    />
+                  );
+                }}
               />
 
               {errors.amount && (
@@ -249,7 +266,6 @@ const EditSubscription: FC<Props> = (props) => {
                 control={control}
                 name="category"
                 render={({field: {onBlur, onChange, value}}) => {
-                  console.log("Value=>", value);
                   return (
                     <CustomPicker
                       options={categoryOptions}

@@ -15,9 +15,6 @@ export const useCreateSubscription = () => {
     return useMutation({
         mutationFn: async (formData: CreateSubscriptionData) => {
             try {
-
-                console.log("data to be submitted:", formData)
-
                 const res = await api.post("/subscriptions", formData)
 
                 return res.data
@@ -27,11 +24,11 @@ export const useCreateSubscription = () => {
             }
         },
         onSuccess: async () => {
-            // Invalidate and refetch queries to update UI immediately
-            await queryClient.invalidateQueries({ queryKey: ["allSubscriptions"] });
-            await queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
-            await queryClient.refetchQueries({ queryKey: ["allSubscriptions"] });
-            await queryClient.refetchQueries({ queryKey: ["dashboardStats"] });
+
+            queryClient.invalidateQueries({ queryKey: ["allSubscriptions"] });
+            queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+            queryClient.refetchQueries({ queryKey: ["allSubscriptions"] });
+            queryClient.refetchQueries({ queryKey: ["dashboardStats"] });
         },
     })
 }
@@ -68,11 +65,10 @@ export const useDeleteSubscription = () => {
             }
         },
         onSuccess: async () => {
-            // Invalidate and refetch queries
-            await queryClient.invalidateQueries({ queryKey: ["allSubscriptions"] });
-            await queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
-            // Force refetch to ensure UI updates
-            await queryClient.refetchQueries({ queryKey: ["allSubscriptions"] });
+
+            queryClient.invalidateQueries({ queryKey: ["allSubscriptions"] });
+            queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+            queryClient.refetchQueries({ queryKey: ["allSubscriptions"] });
         },
     });
 };
@@ -84,7 +80,7 @@ export const useUpdateSubscription = () => {
     return useMutation({
         mutationFn: async ({ id, data }: { id: string; data: Partial<CreateSubscriptionData> }) => {
             try {
-                console.log("Updating subscription:", id, data);
+               
                 const res = await api.patch(`/subscriptions/${id}`, data);
                 return res.data;
             } catch (error) {
@@ -93,11 +89,11 @@ export const useUpdateSubscription = () => {
             }
         },
         onSuccess: async () => {
-            // Invalidate and refetch queries to update UI immediately
-            await queryClient.invalidateQueries({ queryKey: ["allSubscriptions"] });
-            await queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
-            await queryClient.refetchQueries({ queryKey: ["allSubscriptions"] });
-            await queryClient.refetchQueries({ queryKey: ["dashboardStats"] });
+            
+             queryClient.invalidateQueries({ queryKey: ["allSubscriptions"] });
+             queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+             queryClient.refetchQueries({ queryKey: ["allSubscriptions"] });
+             queryClient.refetchQueries({ queryKey: ["dashboardStats"] });
         },
     });
 };

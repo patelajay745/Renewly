@@ -39,13 +39,6 @@ export default function Layout() {
           title: "Create",
         }}
       />
-
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-        }}
-      />
     </Tabs>
   );
 }

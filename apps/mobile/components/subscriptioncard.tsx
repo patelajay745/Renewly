@@ -28,8 +28,6 @@ const SubscriptionCard: FC<Props> = (props) => {
   const {mutate: deleteSubscription, isPending} = useDeleteSubscription();
   const swipeableRef = useRef<any>(null);
 
-  const pathname = `/edit-subscription/${props.id}`;
-
   const handleDelete = (subscriptionId: string, title: string) => {
     Alert.alert(
       "Delete Subscription",
@@ -39,7 +37,6 @@ const SubscriptionCard: FC<Props> = (props) => {
           text: "Cancel",
           style: "cancel",
           onPress: () => {
-            // Close the swipeable when cancelled
             swipeableRef.current?.close();
           },
         },
@@ -49,7 +46,6 @@ const SubscriptionCard: FC<Props> = (props) => {
           onPress: () => {
             deleteSubscription(subscriptionId, {
               onSuccess: () => {
-                // Close the swipeable after successful deletion
                 swipeableRef.current?.close();
               },
               onError: (error) => {
@@ -58,7 +54,6 @@ const SubscriptionCard: FC<Props> = (props) => {
                   "Failed to delete subscription. Please try again."
                 );
                 console.error("Delete error:", error);
-                // Close the swipeable on error too
                 swipeableRef.current?.close();
               },
             });
