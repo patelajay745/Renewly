@@ -2,16 +2,18 @@ import {View, StyleSheet} from "react-native";
 import {DashboardResponse} from "@/types/dashboard";
 import {useAppTheme} from "@/providers/ThemeProvider";
 import {Text} from "./text";
+import Animated, {SlideInDown, Easing} from "react-native-reanimated";
 
 export default function StatsCard({data}: {data: DashboardResponse}) {
   const {colors} = useAppTheme();
 
   return (
-    <View
+    <Animated.View
       style={[
         styles.card,
         {backgroundColor: colors.card, borderColor: colors.borderLight},
       ]}
+      entering={SlideInDown.duration(600).easing(Easing.out(Easing.cubic))}
     >
       <Text style={[styles.title, {color: colors.text}]}>
         Total Subscriptions
@@ -37,7 +39,7 @@ export default function StatsCard({data}: {data: DashboardResponse}) {
           </Text>
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 

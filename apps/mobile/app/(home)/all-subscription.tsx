@@ -15,7 +15,7 @@ import {
   TriangleAlert,
   X,
 } from "lucide-react-native";
-import {FC, useMemo, useState} from "react";
+import {FC, useMemo, useState, useEffect} from "react";
 import {
   View,
   StyleSheet,
@@ -23,7 +23,12 @@ import {
   FlatList,
   TouchableOpacity,
 } from "react-native";
-
+import Animated, {
+  SlideInDown,
+  SlideInUp,
+  SlideOutDown,
+  Layout,
+} from "react-native-reanimated";
 
 const CATEGORIES = [
   {title: "All", value: "All"},
@@ -115,7 +120,9 @@ const AllSubscription: FC<Props> = (props) => {
         </View>
       )}
 
-      <View style={[styles.searchContainer, {backgroundColor: colors.card}]}>
+      <View
+        style={[styles.searchContainer, {backgroundColor: colors.card}]}
+      >
         <Search color={colors.textMuted} size={20} />
         <TextInput
           style={[styles.searchInput]}
@@ -132,7 +139,9 @@ const AllSubscription: FC<Props> = (props) => {
         )}
       </View>
 
-      <View style={styles.categaryContainer}>
+      <View
+        style={styles.categaryContainer}
+      >
         <FlatList
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -186,10 +195,20 @@ const AllSubscription: FC<Props> = (props) => {
           ) : null}
         </View>
       ) : (
-        <FlatList
+        <Animated.FlatList
           data={filteredSubscriptions}
           keyExtractor={(item) => item.id}
-          renderItem={({item}) => <SubscriptionCard {...item} />}
+          renderItem={({item, index}) => (
+            <Animated.View
+              entering={SlideInDown.duration(400)
+                .delay(index * 100)
+                .springify()}
+              //exiting={SlideOutDown.duration(400)}
+              layout={Layout.springify()}
+            >
+              <SubscriptionCard {...item} />
+            </Animated.View>
+          )}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           onRefresh={refetch}

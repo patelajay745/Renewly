@@ -15,6 +15,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import Animated from "react-native-reanimated";
 
 export default function Page() {
   const {colors} = useAppTheme();
