@@ -11,7 +11,6 @@ node_modules
 .env.development.local
 .env.test.local
 .env.production.local
-yarn.lock
 package-lock.json
 
 # Testing
@@ -37,5 +36,3 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
-
-yarn.lock

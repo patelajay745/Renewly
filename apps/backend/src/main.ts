@@ -11,13 +11,17 @@ async function bootstrap() {
     logger: ['error', 'warn', 'log', 'debug', 'verbose'],
   });
   app.enableCors({
-    origin: process.env.CLIENT_URL,
+
+    origin: [
+      process.env.CLIENT_URL,
+      'http://localhost:3000',
+    ].filter(Boolean),
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
     allowedHeaders: 'Content-Type, Authorization',
   });
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('v1');
   const config = new DocumentBuilder()
     .setTitle('Renewly API')
     .setDescription('The Renewly API description')
