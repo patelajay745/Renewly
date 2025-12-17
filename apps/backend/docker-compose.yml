@@ -27,8 +27,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
-    
+    restart: unless-stopped    
 
   redis:
     image: redis:alpine3.22
@@ -38,8 +37,7 @@ services:
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
-    restart: unless-stopped
-    
+    restart: unless-stopped    
 
 volumes:
   postgres_data:
