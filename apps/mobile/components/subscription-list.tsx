@@ -5,6 +5,7 @@ import {NextPayment} from "@/types/dashboard";
 import {useAppTheme} from "@/providers/ThemeProvider";
 import {Text} from "./text";
 import PaymentItemCard from "./payment-item-card";
+import Animated, {Easing, SlideInDown} from "react-native-reanimated";
 
 interface Props {
   data: (RecentSubscription | NextPayment)[];
@@ -13,9 +14,15 @@ interface Props {
 
 const SubscriptionList: FC<Props> = ({data, title}) => {
   const {colors} = useAppTheme();
+  const delayTime = title.includes("Recent") ? 200 : 100;
 
   return (
-    <View style={[styles.card, {backgroundColor: colors.card}]}>
+    <Animated.View
+      style={[styles.card, {backgroundColor: colors.card}]}
+      entering={SlideInDown.duration(600)
+        .delay(delayTime)
+        .easing(Easing.out(Easing.cubic))}
+    >
       <Text style={[styles.title]}>{title}</Text>
 
       {!data.length ? (
@@ -29,7 +36,9 @@ const SubscriptionList: FC<Props> = ({data, title}) => {
           data={data}
           keyExtractor={(item) => item.id}
           scrollEnabled={false}
-          renderItem={({item}) => <PaymentItemCard {...item} />}
+          renderItem={({item, index}) => (
+            <PaymentItemCard {...item} index={index} />
+          )}
           ItemSeparatorComponent={() => (
             <View
               style={[styles.separator, {backgroundColor: colors.borderMuted}]}
@@ -37,7 +46,7 @@ const SubscriptionList: FC<Props> = ({data, title}) => {
           )}
         />
       )}
-    </View>
+    </Animated.View>
   );
 };
 

@@ -4,12 +4,20 @@ import {Text} from "./text";
 import {useAppTheme} from "@/providers/ThemeProvider";
 import {NextPayment, RecentSubscription} from "@/types/dashboard";
 import {Calendar} from "lucide-react-native";
+import Animated, {
+  SlideInDown,
+  SlideInUp,
+  SlideOutDown,
+  Layout,
+} from "react-native-reanimated";
 
-type Props = NextPayment | RecentSubscription;
+type Props = (NextPayment | RecentSubscription) & {
+  index: number;
+};
 
 const PaymentItemCard: FC<Props> = (props) => {
   const {colors} = useAppTheme();
-  const {title, amount, type} = props;
+  const {title, amount, type, index} = props;
   const date = "nextPayment" in props ? props.nextPayment : props.startDate;
   const isRecent = "startDate" in props;
 

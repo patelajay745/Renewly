@@ -16,10 +16,11 @@ import {GestureHandlerRootView} from "react-native-gesture-handler";
 import Reanimated, {
   SharedValue,
   useAnimatedStyle,
+  withSpring,
+  useSharedValue,
 } from "react-native-reanimated";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import {useDeleteSubscription} from "@/hooks/api/use-subscription";
-
 interface Props extends RecentSubscription {}
 
 const SubscriptionCard: FC<Props> = (props) => {
@@ -27,6 +28,20 @@ const SubscriptionCard: FC<Props> = (props) => {
   const router = useRouter();
   const {mutate: deleteSubscription, isPending} = useDeleteSubscription();
   const swipeableRef = useRef<any>(null);
+  const pressed = useSharedValue(false);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          scale: withSpring(pressed.value ? 0.98 : 1, {
+            damping: 15,
+            stiffness: 150,
+          }),
+        },
+      ],
+    };
+  });
 
   const handleDelete = (subscriptionId: string, title: string) => {
     Alert.alert(
@@ -74,40 +89,44 @@ const SubscriptionCard: FC<Props> = (props) => {
           RightAction(prog, drag, props, handleDelete, isPending)
         }
       >
-        <TouchableOpacity
-          style={[styles.card, {backgroundColor: colors.card}]}
-          onPress={() =>
-            router.push({
-              pathname: `/edit-subscription/[id]`,
-              params: {
-                id: props.id,
-                subscriptionData: JSON.stringify(props),
-              },
-            })
-          }
-          activeOpacity={0.7}
-        >
-          <View style={styles.cardHeader}>
-            <Text style={[styles.title]}>{props.title}</Text>
-            <Text style={[styles.amount]}>${props.amount.toFixed(2)}</Text>
-          </View>
-          <View style={styles.cardDetails}>
-            <View style={styles.detailRow}>
-              <Calendar color={colors.textMuted} size={16} />
-              <Text style={styles.detailText} muted>
-                {props.type}
-              </Text>
+        <Reanimated.View style={animatedStyle}>
+          <TouchableOpacity
+            style={[styles.card, {backgroundColor: colors.card}]}
+            onPress={() =>
+              router.push({
+                pathname: `/edit-subscription/[id]`,
+                params: {
+                  id: props.id,
+                  subscriptionData: JSON.stringify(props),
+                },
+              })
+            }
+            onPressIn={() => (pressed.value = true)}
+            onPressOut={() => (pressed.value = false)}
+            activeOpacity={1}
+          >
+            <View style={styles.cardHeader}>
+              <Text style={[styles.title]}>{props.title}</Text>
+              <Text style={[styles.amount]}>${props.amount.toFixed(2)}</Text>
             </View>
-            <View style={styles.detailRow}>
-              <Grid3X3 color={colors.textMuted} size={16} />
-              <Text style={styles.detailText} muted>
-                {props.category.replaceAll("_", " ")}
-              </Text>
-            </View>
+            <View style={styles.cardDetails}>
+              <View style={styles.detailRow}>
+                <Calendar color={colors.textMuted} size={16} />
+                <Text style={styles.detailText} muted>
+                  {props.type}
+                </Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Grid3X3 color={colors.textMuted} size={16} />
+                <Text style={styles.detailText} muted>
+                  {props.category.replaceAll("_", " ")}
+                </Text>
+              </View>
 
-            {props.notification && <Bell color={colors.success} size={14} />}
-          </View>
-        </TouchableOpacity>
+              {props.notification && <Bell color={colors.success} size={14} />}
+            </View>
+          </TouchableOpacity>
+        </Reanimated.View>
       </ReanimatedSwipeable>
     </GestureHandlerRootView>
   );

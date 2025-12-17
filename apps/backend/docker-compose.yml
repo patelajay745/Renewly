@@ -1,8 +1,24 @@
 services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: my_subscription_backend
+    env_file:
+      - .env
+    environment:
+      DB_HOST: postgres
+      REDIS_HOST: redis
+    ports:
+      - "8083:8083"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
   postgres:
     image: postgres:16
     container_name: my_subscription_postgres
-
     environment:
       POSTGRES_USER: aj_user
       POSTGRES_PASSWORD: supersecretpassword
@@ -11,6 +27,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    
 
   redis:
     image: redis:alpine3.22
@@ -20,6 +38,8 @@ services:
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
+    restart: unless-stopped
+    
 
 volumes:
   postgres_data:
