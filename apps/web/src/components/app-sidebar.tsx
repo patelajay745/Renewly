@@ -11,13 +11,19 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 
-import { LayoutDashboard, LogOut } from "lucide-react";
-import { Link } from "@tanstack/react-router";
-import { UserButton, useClerk, useUser } from "@clerk/clerk-react";
+import {
+  LayoutDashboard,
+  LogOut,
+  HelpCircle,
+  Shield,
+  FileText,
+} from "lucide-react";
+import {Link} from "@tanstack/react-router";
+import {UserButton, useClerk, useUser} from "@clerk/clerk-react";
 
 export function AppSidebar() {
-  const { user } = useUser();
-  const { signOut } = useClerk();
+  const {user} = useUser();
+  const {signOut} = useClerk();
 
   return (
     <Sidebar>
@@ -43,6 +49,38 @@ export function AppSidebar() {
                   <Link to="/dashboard">
                     <LayoutDashboard className="w-4 h-4" />
                     <span>Dashboard</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Support & Legal</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/faq">
+                    <HelpCircle className="w-4 h-4" />
+                    <span>Mobile App FAQ</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/privacy">
+                    <Shield className="w-4 h-4" />
+                    <span>Privacy Policy</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link to="/terms">
+                    <FileText className="w-4 h-4" />
+                    <span>Terms & Conditions</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
