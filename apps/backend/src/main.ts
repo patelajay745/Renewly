@@ -11,6 +11,7 @@ async function bootstrap() {
     logger: ['error', 'warn', 'log', 'debug', 'verbose'],
   });
   app.enableCors({
+
     origin: [
       process.env.CLIENT_URL,
       'http://localhost:3000',

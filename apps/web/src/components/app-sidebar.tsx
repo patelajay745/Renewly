@@ -18,12 +18,12 @@ import {
   Shield,
   FileText,
 } from "lucide-react";
-import {Link} from "@tanstack/react-router";
-import {UserButton, useClerk, useUser} from "@clerk/clerk-react";
+import { Link } from "@tanstack/react-router";
+import { UserButton, useClerk, useUser } from "@clerk/clerk-react";
 
 export function AppSidebar() {
-  const {user} = useUser();
-  const {signOut} = useClerk();
+  const { user } = useUser();
+  const { signOut } = useClerk();
 
   return (
     <Sidebar>
