@@ -58,6 +58,8 @@ const AllSubscription: FC<Props> = (props) => {
     refetch,
   } = useAllSubscriptions();
 
+  console.log(allSubscriptions);
+
   if (isLoading) {
     return (
       <View
@@ -120,9 +122,7 @@ const AllSubscription: FC<Props> = (props) => {
         </View>
       )}
 
-      <View
-        style={[styles.searchContainer, {backgroundColor: colors.card}]}
-      >
+      <View style={[styles.searchContainer, {backgroundColor: colors.card}]}>
         <Search color={colors.textMuted} size={20} />
         <TextInput
           style={[styles.searchInput]}
@@ -139,9 +139,7 @@ const AllSubscription: FC<Props> = (props) => {
         )}
       </View>
 
-      <View
-        style={styles.categaryContainer}
-      >
+      <View style={styles.categaryContainer}>
         <FlatList
           horizontal
           showsHorizontalScrollIndicator={false}

@@ -68,9 +68,6 @@ export class SubscriptionsService {
       skip: query?.page ? (query.page - 1) * (query?.limit || 50) : 0,
     });
 
-    if (!subscriptions?.length)
-      throw new NotFoundException('No subscriptions found');
-
     await this.cache.set(cacheKey, subscriptions, 15 * 60 * 1000);
 
     await this.addCacheKeyToUserTag(user.id, cacheKey);
@@ -212,6 +209,27 @@ export class SubscriptionsService {
     }
   }
 
+  async deleteAll(user: User) {
+
+    try {
+
+      await this.subscriptionRepository.delete({ clerkUserId: user.id })
+
+      await this.clearUserSubscriptionsCache(user.id);
+
+      await this.clearDashboardCache(user.id);
+
+      return {
+        message: "All The Data have been deleted"
+      }
+
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(error, 400);
+    }
+
+  }
+
   private generateSubscriptionsListKey(userId: string, query?: any): string {
     const queryHash = JSON.stringify(query || {});
     return `subscriptions:list:user_${userId}:${queryHash}`;
@@ -267,7 +285,7 @@ export class SubscriptionsService {
     try {
       const userDashboardKey = `dashboard:user:${userId}`;
       const adminDashboardKey = `dashboard:admin:${userId}`;
-await this.cache.del(userDashboardKey);
+      await this.cache.del(userDashboardKey);
       await this.cache.del(adminDashboardKey);
 
       this.logger.log(`DASHBOARD CACHE CLEARED for user: ${userId}`);

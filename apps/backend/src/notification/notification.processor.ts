@@ -11,7 +11,7 @@ export interface NotificationJobData {
 }
 
 @Processor('notifications', {
-    concurrency: 5, // Process 5 notifications at a time per worker
+    concurrency: 5,
 })
 export class NotificationProcessor extends WorkerHost implements OnModuleInit {
     private readonly logger = new Logger(NotificationProcessor.name);
@@ -49,10 +49,9 @@ export class NotificationProcessor extends WorkerHost implements OnModuleInit {
             `Processing notification job ${job.id} for subscription: ${subscriptionTitle} (attempt ${job.attemptsMade + 1})`
         );
 
-        // Validate Expo push token
         if (!Expo.isExpoPushToken(expoToken)) {
             this.logger.error(`Invalid Expo push token: ${expoToken}`);
-            // Don't retry for invalid tokens
+
             throw new Error('Invalid Expo push token');
         }
 
@@ -77,19 +76,16 @@ export class NotificationProcessor extends WorkerHost implements OnModuleInit {
                     `Notification sent successfully for job ${job.id}. Ticket: ${JSON.stringify(ticketChunk)}`
                 );
 
-                // Check for errors in the ticket
                 for (const ticket of ticketChunk) {
                     if (ticket.status === 'error') {
                         this.logger.error(
                             `Expo returned error for job ${job.id}: ${ticket.message}`
                         );
 
-                        // If it's a device not registered error, don't retry
                         if (ticket.details?.error === 'DeviceNotRegistered') {
                             throw new Error('DeviceNotRegistered - will not retry');
                         }
 
-                        // For other errors, throw to trigger retry
                         throw new Error(`Expo error: ${ticket.message}`);
                     }
                 }
@@ -102,7 +98,6 @@ export class NotificationProcessor extends WorkerHost implements OnModuleInit {
                 error.stack
             );
 
-            // Re-throw to let BullMQ handle retry logic
             throw error;
         }
     }

@@ -19,11 +19,10 @@ export class NotificationService {
         private notificationQueue: Queue<NotificationJobData>
     ) { }
 
-    @Cron(CronExpression.EVERY_MINUTE)
+    @Cron(CronExpression.EVERY_DAY_AT_10AM)
     async handleCron() {
         this.logger.log('Running scheduled notification check...');
 
-        // Fetch all subscriptions with notifications enabled
         const subscriptions = await this.subscriptionRepository.find({
             where: {
                 notification: true
@@ -36,7 +35,6 @@ export class NotificationService {
         const tomorrowMonth = tomorrowDate.getMonth();
         const tomorrowDay = tomorrowDate.getDate();
 
-        // Filter subscriptions that are renewing tomorrow
         const renewingTomorrow = subscriptions.filter(subscription => {
             const nextRenewalDate = this.calculateNextRenewalDate(subscription);
 
@@ -51,7 +49,6 @@ export class NotificationService {
 
         this.logger.log(`Found ${renewingTomorrow.length} subscriptions renewing tomorrow`);
 
-        // Add each notification to the queue
         let enqueuedCount = 0;
         for (const subscription of renewingTomorrow) {
             if (subscription.expoToken) {
@@ -65,20 +62,20 @@ export class NotificationService {
                             subscriptionId: subscription.id,
                         },
                         {
-                            // Job options
-                            attempts: 3, // Retry up to 3 times
+
+                            attempts: 3,
                             backoff: {
                                 type: 'exponential',
-                                delay: 2000, // Start with 2 seconds, then 4, 8, etc.
+                                delay: 2000,
                             },
                             removeOnComplete: {
-                                age: 3600, // Keep completed jobs for 1 hour
-                                count: 1000, // Keep last 1000 completed jobs
+                                age: 3600,
+                                count: 1000,
                             },
                             removeOnFail: {
-                                age: 86400, // Keep failed jobs for 24 hours
+                                age: 86400,
                             },
-                            // Prevent duplicate notifications for the same subscription today
+
                             jobId: `renewal-reminder-${subscription.id}-${new Date().toISOString().split('T')[0]}`,
                         }
                     );

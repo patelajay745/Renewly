@@ -21,7 +21,7 @@ export class QueueHealthService implements OnModuleInit {
             if (isReady) {
                 this.logger.log('✅ BullMQ connected to Redis successfully');
 
-                // Log queue stats
+               
                 const waiting = await this.notificationQueue.getWaitingCount();
                 const active = await this.notificationQueue.getActiveCount();
                 const completed = await this.notificationQueue.getCompletedCount();
@@ -29,7 +29,7 @@ export class QueueHealthService implements OnModuleInit {
 
                 this.logger.log(`Queue stats - Waiting: ${waiting}, Active: ${active}, Completed: ${completed}, Failed: ${failed}`);
 
-                // Check failed jobs for errors
+                
                 if (failed > 0) {
                     const failedJobs = await this.notificationQueue.getFailed(0, 5);
                     this.logger.warn(`Found ${failed} failed job(s):`);
@@ -38,7 +38,7 @@ export class QueueHealthService implements OnModuleInit {
                     }
                 }
 
-                // Check waiting jobs
+               
                 if (waiting > 0) {
                     this.logger.log(`⏳ ${waiting} job(s) waiting to be processed`);
                 }

@@ -1,11 +1,26 @@
-import {StyleSheet, View} from "react-native";
+import {
+  StyleSheet,
+  View,
+  Linking,
+  TouchableOpacity,
+  ViewStyle,
+  TextStyle,
+} from "react-native";
 import React from "react";
 import SocialLoginButton from "@/components/social-login-button";
 import {useAppTheme} from "@/providers/ThemeProvider";
-import { Text } from "@/components/text";
+import {Text} from "@/components/text";
 
 export default function Page() {
   const {colors} = useAppTheme();
+
+  const openTerms = () => {
+    Linking.openURL("https://www.renewly.cc/terms");
+  };
+
+  const openPrivacy = () => {
+    Linking.openURL("https://www.renewly.cc/privacy");
+  };
 
   return (
     <View style={[styles.container, {backgroundColor: colors.background}]}>
@@ -23,13 +38,35 @@ export default function Page() {
         <SocialLoginButton strategy="apple" />
       </View>
       <Text style={[styles.footerText, {color: `${colors.textMuted}`}]}>
-        By signing in, you agree to our Terms of Service and Privacy Policy.
+        By signing in, you agree to our{" "}
+        <Text
+          style={[styles.linkText, {color: colors.primary}]}
+          onPress={openTerms}
+        >
+          Terms of Service
+        </Text>{" "}
+        and{" "}
+        <Text
+          style={[styles.linkText, {color: colors.primary}]}
+          onPress={openPrivacy}
+        >
+          Privacy Policy
+        </Text>
+        .
       </Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create<{
+  container: ViewStyle;
+  textContainer: ViewStyle;
+  buttonContainer: ViewStyle;
+  welcomeText: TextStyle;
+  description: TextStyle;
+  footerText: TextStyle;
+  linkText: TextStyle;
+}>({
   container: {
     flex: 1,
     alignItems: "center",
@@ -55,5 +92,9 @@ const styles = StyleSheet.create({
   footerText: {
     textAlign: "center",
     fontSize: 12,
+  },
+  linkText: {
+    fontSize: 12,
+    textDecorationLine: "underline",
   },
 });

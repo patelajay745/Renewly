@@ -72,7 +72,7 @@ const SocialLoginButton = ({
     try {
       setIsLoading(true);
       const {createdSessionId, setActive} = await startOAuthFlow({
-        redirectUrl: Linking.createURL("/", {scheme: "renewly"}),
+        redirectUrl: "renewly://sso-callback",
       });
 
       // If sign in was successful, set the active session

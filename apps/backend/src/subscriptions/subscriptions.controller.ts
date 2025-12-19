@@ -63,4 +63,11 @@ export class SubscriptionsController {
   remove(@Param('id') id: string, @CurrentUser() user: User) {
     return this.subscriptionsService.remove(user, id);
   }
+
+  @Protected()
+  @UseGuards(ClerkAuthGuard)
+  @Delete("/delete-account")
+  deleteAll(@CurrentUser() user: User) {
+    return this.subscriptionsService.deleteAll(user)
+  }
 }
