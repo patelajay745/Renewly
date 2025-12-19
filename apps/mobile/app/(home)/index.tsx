@@ -5,9 +5,10 @@ import {Text} from "@/components/text";
 
 import {useGetDashboardStats} from "@/hooks/api/use-dashboard";
 import {useAppTheme} from "@/providers/ThemeProvider";
-import {useUser} from "@clerk/clerk-expo";
+import {useAuth, useUser} from "@clerk/clerk-expo";
 import {StatusBar} from "expo-status-bar";
 import {TriangleAlert} from "lucide-react-native";
+import {useEffect} from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -15,12 +16,22 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import Animated from "react-native-reanimated";
 
 export default function Page() {
   const {colors} = useAppTheme();
   const {user} = useUser();
   const {data, isLoading, refetch, error} = useGetDashboardStats();
+  const {getToken} = useAuth();
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      const token = await getToken();
+      console.log(token);
+    };
+    fetchToken();
+
+    console.log(data);
+  }, [data]);
 
   if (isLoading) {
     return (

@@ -68,9 +68,6 @@ export class SubscriptionsService {
       skip: query?.page ? (query.page - 1) * (query?.limit || 50) : 0,
     });
 
-    if (!subscriptions?.length)
-      throw new NotFoundException('No subscriptions found');
-
     await this.cache.set(cacheKey, subscriptions, 15 * 60 * 1000);
 
     await this.addCacheKeyToUserTag(user.id, cacheKey);
@@ -267,7 +264,7 @@ export class SubscriptionsService {
     try {
       const userDashboardKey = `dashboard:user:${userId}`;
       const adminDashboardKey = `dashboard:admin:${userId}`;
-await this.cache.del(userDashboardKey);
+      await this.cache.del(userDashboardKey);
       await this.cache.del(adminDashboardKey);
 
       this.logger.log(`DASHBOARD CACHE CLEARED for user: ${userId}`);
