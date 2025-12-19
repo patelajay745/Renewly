@@ -13,6 +13,9 @@
       "bundleIdentifier": "com.subscription.Renewly",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "entitlements": {
+        "com.apple.developer.applesignin": ["Default"]
       }
     },
     "android": {
@@ -34,7 +37,8 @@
           ],
           "category": ["BROWSABLE", "DEFAULT"]
         }
-      ]
+      ],
+      "googleServicesFile": "./google-services.json"
     },
     "plugins": [
       "expo-router",
@@ -64,8 +68,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "7e666261-6612-4122-9157-e4cbaab8492a"
+        "projectId": "fbcc7bf8-0756-49dd-9297-a692d92add79"
       }
-    }
+    },
+    "owner": "patel.ajay745"
   }
 }

@@ -36,7 +36,7 @@ export const getExpoNotificationToken = async () => {
         try {
             token = (
                 await Notifications.getExpoPushTokenAsync({
-                    projectId: "7e666261-6612-4122-9157-e4cbaab8492a",
+                    projectId: process.env.EXPO_PUBLIC_PROJECTID,
                 })
             ).data;
             console.log("📱 Expo Push Token:", token);

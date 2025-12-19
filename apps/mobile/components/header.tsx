@@ -11,6 +11,7 @@ import {EditIcon, LinkIcon} from "lucide-react-native";
 import {semanticColors} from "@/constants/theme";
 import {useAppTheme} from "@/providers/ThemeProvider";
 import {Text} from "./text";
+import {StatusBar} from "expo-status-bar";
 
 interface Props {
   title?: string;
@@ -35,7 +36,7 @@ const Header: FC<Props> = ({
       ? 50
       : 30;
 
-  const {colors} = useAppTheme();
+  const {colors, mode} = useAppTheme();
 
   return (
     <View
@@ -50,6 +51,9 @@ const Header: FC<Props> = ({
         },
       ]}
     >
+      {Platform.OS === "android" && (
+        <StatusBar style={mode === "dark" ? "light" : "dark"} />
+      )}
       {showHeaderContent && (
         <View
           style={[
