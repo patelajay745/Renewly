@@ -3,9 +3,12 @@ import {DashboardResponse} from "@/types/dashboard";
 import {useAppTheme} from "@/providers/ThemeProvider";
 import {Text} from "./text";
 import Animated, {SlideInDown, Easing} from "react-native-reanimated";
+import {useCurrency} from "@/providers/CurrencyProvider";
+import {formatPrice} from "@/lib/currency-utils";
 
 export default function StatsCard({data}: {data: DashboardResponse}) {
   const {colors} = useAppTheme();
+  const {selectedCurrency} = useCurrency();
 
   return (
     <Animated.View
@@ -26,7 +29,7 @@ export default function StatsCard({data}: {data: DashboardResponse}) {
         <View style={styles.item}>
           <Text style={[styles.label, {color: colors.textMuted}]}>Monthly</Text>
           <Text style={[styles.amount, {color: colors.primary}]}>
-            ${data.stats.totalMonthlySpend.toFixed(2)}
+            {formatPrice(data?.stats?.totalMonthlySpend, selectedCurrency)}
           </Text>
         </View>
 
@@ -35,7 +38,7 @@ export default function StatsCard({data}: {data: DashboardResponse}) {
             Yearly Projection
           </Text>
           <Text style={[styles.amount, {color: colors.primary}]}>
-            ${data.stats.totalYearlyProjection.toFixed(2)}
+            {formatPrice(data?.stats?.totalYearlyProjection, selectedCurrency)}
           </Text>
         </View>
       </View>

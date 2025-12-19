@@ -9,9 +9,12 @@ import {
   Alert,
   ScrollView,
   Linking,
+  Modal,
+  Pressable,
 } from "react-native";
 import {StatusBar} from "expo-status-bar";
 import {useAppTheme} from "@/providers/ThemeProvider";
+import {useCurrency} from "@/providers/CurrencyProvider";
 import {useClerk, useUser} from "@clerk/clerk-expo";
 import {Ionicons} from "@expo/vector-icons";
 import {router} from "expo-router";
@@ -85,9 +88,11 @@ const SectionHeader: FC<SectionHeaderProps> = ({title, colors}) => {
 
 const Settings: FC<Props> = (props) => {
   const {colors, mode, toggleTheme} = useAppTheme();
+  const {selectedCurrency, setSelectedCurrency, currencies} = useCurrency();
   const {signOut} = useClerk();
   const {user} = useUser();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
 
   const {mutate: deleteAccount} = useDeleteAccount();
 
@@ -191,6 +196,14 @@ const Settings: FC<Props> = (props) => {
         <SectionHeader title="General" colors={colors} />
         <View style={styles.section}>
           <SettingItem
+            icon="cash-outline"
+            title="Currency"
+            subtitle={`${selectedCurrency.name} (${selectedCurrency.symbol})`}
+            onPress={() => setShowCurrencyModal(true)}
+            showArrow
+            colors={colors}
+          />
+          <SettingItem
             icon="chatbox-outline"
             title="Leave feedback"
             subtitle="Let's know what feature do you want to add in."
@@ -220,7 +233,7 @@ const Settings: FC<Props> = (props) => {
           />
         </View>
 
-        {/* Legal Section */}
+        
         <SectionHeader title="Legal" colors={colors} />
         <View style={styles.section}>
           <SettingItem
@@ -239,7 +252,6 @@ const Settings: FC<Props> = (props) => {
           />
         </View>
 
-       
         <View style={[styles.section, styles.accountSection]}>
           <TouchableOpacity
             style={[
@@ -269,11 +281,80 @@ const Settings: FC<Props> = (props) => {
           </TouchableOpacity>
         </View>
 
-        
         <Text style={[styles.versionText, {color: colors.textMuted}]}>
           Version 1.0.0
         </Text>
       </ScrollView>
+
+      <Modal
+        visible={showCurrencyModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowCurrencyModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <Pressable
+            style={styles.modalBackdrop}
+            onPress={() => setShowCurrencyModal(false)}
+          />
+          <View style={[styles.modalContent, {backgroundColor: colors.card}]}>
+            <View
+              style={[styles.modalHeader, {borderBottomColor: colors.border}]}
+            >
+              <Text style={[styles.modalTitle, {color: colors.text}]}>
+                Select Currency
+              </Text>
+              <TouchableOpacity
+                onPress={() => setShowCurrencyModal(false)}
+                style={styles.closeButton}
+              >
+                <Ionicons name="close" size={24} color={colors.text} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.currencyList}>
+              {currencies.map((currency) => (
+                <TouchableOpacity
+                  key={currency.code}
+                  style={[
+                    styles.currencyItem,
+                    {borderBottomColor: colors.border},
+                    selectedCurrency.code === currency.code && {
+                      backgroundColor: colors.primary + "15",
+                    },
+                  ]}
+                  onPress={() => {
+                    setSelectedCurrency(currency);
+                    setShowCurrencyModal(false);
+                  }}
+                >
+                  <View style={styles.currencyInfo}>
+                    <Text style={[styles.currencySymbol, {color: colors.text}]}>
+                      {currency.symbol}
+                    </Text>
+                    <View>
+                      <Text style={[styles.currencyCode, {color: colors.text}]}>
+                        {currency.code}
+                      </Text>
+                      <Text
+                        style={[styles.currencyName, {color: colors.textMuted}]}
+                      >
+                        {currency.name}
+                      </Text>
+                    </View>
+                  </View>
+                  {selectedCurrency.code === currency.code && (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={24}
+                      color={colors.primary}
+                    />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -348,6 +429,62 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 12,
     marginTop: 24,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  modalBackdrop: {
+    flex: 1,
+  },
+  modalContent: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: "80%",
+    paddingBottom: Platform.OS === "ios" ? 34 : 16,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 16,
+    borderBottomWidth: 1,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  closeButton: {
+    padding: 4,
+  },
+  currencyList: {
+    maxHeight: 500,
+  },
+  currencyItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 16,
+    borderBottomWidth: 0.5,
+  },
+  currencyInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  currencySymbol: {
+    fontSize: 24,
+    fontWeight: "600",
+    width: 40,
+  },
+  currencyCode: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  currencyName: {
+    fontSize: 13,
+    marginTop: 2,
   },
 });
 

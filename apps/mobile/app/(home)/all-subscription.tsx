@@ -201,7 +201,6 @@ const AllSubscription: FC<Props> = (props) => {
               entering={SlideInDown.duration(400)
                 .delay(index * 100)
                 .springify()}
-              //exiting={SlideOutDown.duration(400)}
               layout={Layout.springify()}
             >
               <SubscriptionCard {...item} />

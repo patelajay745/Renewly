@@ -3,6 +3,7 @@ import {ClerkProvider} from "@clerk/clerk-expo";
 import {tokenCache} from "@clerk/clerk-expo/token-cache";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {ThemeProvider} from "@/providers/ThemeProvider";
+import {CurrencyProvider} from "@/providers/CurrencyProvider";
 import {useFonts} from "expo-font";
 import {useEffect} from "react";
 import * as SplashScreen from "expo-splash-screen";
@@ -32,17 +33,19 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <ClerkProvider tokenCache={tokenCache}>
           <ThemeProvider>
-            <Stack screenOptions={{headerShown: false}}>
-              <Stack.Screen name="(auth)" options={{headerShown: false}} />
-              <Stack.Screen name="(home)" options={{headerShown: false}} />
-              <Stack.Screen
-                name="edit-subscription"
-                options={{
-                  presentation: "modal",
-                  headerShown: false,
-                }}
-              />
-            </Stack>
+            <CurrencyProvider>
+              <Stack screenOptions={{headerShown: false}}>
+                <Stack.Screen name="(auth)" options={{headerShown: false}} />
+                <Stack.Screen name="(home)" options={{headerShown: false}} />
+                <Stack.Screen
+                  name="edit-subscription"
+                  options={{
+                    presentation: "modal",
+                    headerShown: false,
+                  }}
+                />
+              </Stack>
+            </CurrencyProvider>
           </ThemeProvider>
         </ClerkProvider>
       </QueryClientProvider>

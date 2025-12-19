@@ -21,6 +21,8 @@ import Reanimated, {
 } from "react-native-reanimated";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import {useDeleteSubscription} from "@/hooks/api/use-subscription";
+import {useCurrency} from "@/providers/CurrencyProvider";
+import {formatPrice} from "@/lib/currency-utils";
 interface Props extends RecentSubscription {}
 
 const SubscriptionCard: FC<Props> = (props) => {
@@ -29,6 +31,7 @@ const SubscriptionCard: FC<Props> = (props) => {
   const {mutate: deleteSubscription, isPending} = useDeleteSubscription();
   const swipeableRef = useRef<any>(null);
   const pressed = useSharedValue(false);
+  const {selectedCurrency} = useCurrency();
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -107,7 +110,9 @@ const SubscriptionCard: FC<Props> = (props) => {
           >
             <View style={styles.cardHeader}>
               <Text style={[styles.title]}>{props.title}</Text>
-              <Text style={[styles.amount]}>${props.amount.toFixed(2)}</Text>
+              <Text style={[styles.amount]}>
+                {formatPrice(props.amount, selectedCurrency)}
+              </Text>
             </View>
             <View style={styles.cardDetails}>
               <View style={styles.detailRow}>

@@ -10,6 +10,8 @@ import Animated, {
   SlideOutDown,
   Layout,
 } from "react-native-reanimated";
+import {useCurrency} from "@/providers/CurrencyProvider";
+import {formatPrice} from "@/lib/currency-utils";
 
 type Props = (NextPayment | RecentSubscription) & {
   index: number;
@@ -20,6 +22,7 @@ const PaymentItemCard: FC<Props> = (props) => {
   const {title, amount, type, index} = props;
   const date = "nextPayment" in props ? props.nextPayment : props.startDate;
   const isRecent = "startDate" in props;
+  const {selectedCurrency} = useCurrency();
 
   return (
     <View style={[styles.row]}>
@@ -42,7 +45,9 @@ const PaymentItemCard: FC<Props> = (props) => {
         </View>
       </View>
 
-      <Text style={[styles.amount, {color: colors.accent}]}>$ {amount}</Text>
+      <Text style={[styles.amount, {color: colors.accent}]}>
+        {formatPrice(amount, selectedCurrency)}
+      </Text>
     </View>
   );
 };
