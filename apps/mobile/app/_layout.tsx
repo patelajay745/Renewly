@@ -1,5 +1,5 @@
 import {Stack} from "expo-router";
-import {ClerkProvider} from "@clerk/clerk-expo";
+import {ClerkProvider, useUser} from "@clerk/clerk-expo";
 import {tokenCache} from "@clerk/clerk-expo/token-cache";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {ThemeProvider} from "@/providers/ThemeProvider";
@@ -8,8 +8,10 @@ import {useFonts} from "expo-font";
 import {useEffect} from "react";
 import * as SplashScreen from "expo-splash-screen";
 import {GestureHandlerRootView} from "react-native-gesture-handler";
+import {identifyDevice, vexo} from "vexo-analytics";
 
 export const queryClient = new QueryClient();
+if (!__DEV__) vexo(process.env.EXPO_PUBLIC_VEXO!);
 
 SplashScreen.preventAutoHideAsync();
 

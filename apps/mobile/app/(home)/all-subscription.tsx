@@ -58,8 +58,6 @@ const AllSubscription: FC<Props> = (props) => {
     refetch,
   } = useAllSubscriptions();
 
-  console.log(allSubscriptions);
-
   if (isLoading) {
     return (
       <View

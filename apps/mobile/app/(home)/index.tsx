@@ -23,15 +23,15 @@ export default function Page() {
   const {data, isLoading, refetch, error} = useGetDashboardStats();
   const {getToken} = useAuth();
 
-  useEffect(() => {
-    const fetchToken = async () => {
-      const token = await getToken();
-      console.log(token);
-    };
-    fetchToken();
+  // useEffect(() => {
+  //   const fetchToken = async () => {
+  //     const token = await getToken();
+  //     console.log(token);
+  //   };
+  //   fetchToken();
 
-    console.log(data);
-  }, [data]);
+  //   console.log(data);
+  // }, [data]);
 
   if (isLoading) {
     return (

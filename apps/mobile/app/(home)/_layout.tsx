@@ -4,11 +4,16 @@ import {Pressable, View, StyleSheet, Platform} from "react-native";
 import {useAppTheme} from "@/providers/ThemeProvider";
 import {useUser} from "@clerk/clerk-expo";
 import {Text} from "@/components/text";
+import {identifyDevice} from "vexo-analytics";
 
 export default function Layout() {
-  const {isSignedIn} = useUser();
+  const {isSignedIn, user} = useUser();
 
   if (!isSignedIn) return <Redirect href={"/sign-in"} />;
+
+  if (user) {
+    identifyDevice(user.emailAddresses[0].emailAddress);
+  }
 
   return (
     <Tabs
