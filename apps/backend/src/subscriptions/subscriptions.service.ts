@@ -209,6 +209,27 @@ export class SubscriptionsService {
     }
   }
 
+  async deleteAll(user: User) {
+
+    try {
+
+      await this.subscriptionRepository.delete({ clerkUserId: user.id })
+
+      await this.clearUserSubscriptionsCache(user.id);
+
+      await this.clearDashboardCache(user.id);
+
+      return {
+        message: "All The Data have been deleted"
+      }
+
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(error, 400);
+    }
+
+  }
+
   private generateSubscriptionsListKey(userId: string, query?: any): string {
     const queryHash = JSON.stringify(query || {});
     return `subscriptions:list:user_${userId}:${queryHash}`;

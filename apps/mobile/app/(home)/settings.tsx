@@ -16,6 +16,7 @@ import {useClerk, useUser} from "@clerk/clerk-expo";
 import {Ionicons} from "@expo/vector-icons";
 import {router} from "expo-router";
 import {Text} from "@/components/text";
+import {useDeleteAccount} from "@/hooks/api/use-account";
 
 interface Props {}
 
@@ -88,6 +89,8 @@ const Settings: FC<Props> = (props) => {
   const {user} = useUser();
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const {mutate: deleteAccount} = useDeleteAccount();
+
   const handleSignOut = async () => {
     Alert.alert("Sign out", "Are you sure you want to sign out?", [
       {
@@ -123,7 +126,6 @@ const Settings: FC<Props> = (props) => {
           text: "Delete",
           style: "destructive",
           onPress: async () => {
-            // Second confirmation
             Alert.alert(
               "Final Confirmation",
               "This will permanently delete your account and all associated data. Are you absolutely sure?",
@@ -138,6 +140,7 @@ const Settings: FC<Props> = (props) => {
                   onPress: async () => {
                     try {
                       setIsDeleting(true);
+                      deleteAccount();
                       await user?.delete();
                       router.replace("/(auth)/sign-in");
                     } catch (err) {
@@ -159,43 +162,20 @@ const Settings: FC<Props> = (props) => {
     );
   };
 
-  const handleClearCache = () => {
-    Alert.alert(
-      "Clear cache",
-      "This will clear all cached data. Are you sure?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Clear",
-          style: "destructive",
-          onPress: () => {
-            // Implement cache clearing logic
-            Alert.alert("Success", "Cache cleared successfully");
-          },
-        },
-      ]
-    );
-  };
-
   const handleFeedback = () => {
-    // Open feedback form or email
-    Linking.openURL("mailto:support@renewly.app?subject=App Feedback");
+    Linking.openURL("mailto:patel.ajay745@gmail.com?subject=App Feedback");
   };
 
   const handleFAQ = () => {
-    // Navigate to FAQ screen or open FAQ URL
-    Linking.openURL("https://renewly.app/faq");
+    Linking.openURL("https://www.renewly.cc/faq");
   };
 
   const handlePrivacyTerms = () => {
-    Linking.openURL("https://renewly.app/privacy");
+    Linking.openURL("https://www.renewly.cc/privacy");
   };
 
   const handleTermsConditions = () => {
-    Linking.openURL("https://renewly.app/terms");
+    Linking.openURL("https://www.renewly.cc/terms");
   };
 
   return (
@@ -259,7 +239,7 @@ const Settings: FC<Props> = (props) => {
           />
         </View>
 
-        {/* Account Section */}
+       
         <View style={[styles.section, styles.accountSection]}>
           <TouchableOpacity
             style={[
@@ -289,7 +269,7 @@ const Settings: FC<Props> = (props) => {
           </TouchableOpacity>
         </View>
 
-        {/* App Version */}
+        
         <Text style={[styles.versionText, {color: colors.textMuted}]}>
           Version 1.0.0
         </Text>
