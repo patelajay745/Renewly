@@ -9,6 +9,7 @@ import {useEffect} from "react";
 import * as SplashScreen from "expo-splash-screen";
 import {GestureHandlerRootView} from "react-native-gesture-handler";
 import {identifyDevice, vexo} from "vexo-analytics";
+import * as Linking from "expo-linking";
 
 export const queryClient = new QueryClient();
 if (!__DEV__) vexo(process.env.EXPO_PUBLIC_VEXO!);
@@ -30,10 +31,17 @@ export default function RootLayout() {
     return null;
   }
 
+  const linking = {
+    prefixes: [Linking.createURL("/"), "renewly://", "exp+renewly://"],
+  };
+
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <QueryClientProvider client={queryClient}>
-        <ClerkProvider tokenCache={tokenCache}>
+        <ClerkProvider
+          tokenCache={tokenCache}
+          publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!}
+        >
           <ThemeProvider>
             <CurrencyProvider>
               <Stack screenOptions={{headerShown: false}}>

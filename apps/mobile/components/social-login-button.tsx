@@ -72,7 +72,7 @@ const SocialLoginButton = ({
     try {
       setIsLoading(true);
       const {createdSessionId, setActive} = await startOAuthFlow({
-        redirectUrl: "renewly://sso-callback",
+        redirectUrl: Linking.createURL("(home)"),
       });
 
       // If sign in was successful, set the active session
@@ -80,6 +80,7 @@ const SocialLoginButton = ({
         // console.log("Session created", createdSessionId);
         setActive!({session: createdSessionId});
         await user?.reload();
+        router.replace("/(home)");
       } else {
         // Use signIn or signUp returned from startOAuthFlow
         // for next steps, such as MFA
