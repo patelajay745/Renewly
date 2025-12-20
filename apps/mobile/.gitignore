@@ -20,7 +20,6 @@ expo-env.d.ts
 yarn.lock
 package-lock.json
 renewly-firebase.json
-google-services.json
 
 # Metro
 .metro-health-check*
@@ -45,3 +44,4 @@ app-example
 # generated native folders
 /ios
 /android
+google-services.json

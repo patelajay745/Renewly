@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "f92e460d-8d82-42ef-9e66-95a1bde87012"
+      }
+    },
+    "android": {
+      "package": "com.patel.ajay745.renewly"
+    }
+  }
+}

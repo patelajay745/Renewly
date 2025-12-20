@@ -45,9 +45,12 @@ yarn-error.\*
 
 # typescript
 
-\*.tsbuildinfo
+*.tsbuildinfo
 
 app-example
+
+# Include google-services.json in EAS builds (even though it's in .gitignore)
+!google-services.json
 
 # generated native folders
 

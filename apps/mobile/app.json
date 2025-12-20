@@ -41,6 +41,7 @@
       "googleServicesFile": "./google-services.json"
     },
     "plugins": [
+      "expo-notifications",
       "expo-router",
       [
         "expo-splash-screen",
@@ -58,6 +59,15 @@
         "expo-font",
         {
           "fonts": ["./assets/fonts/delius.ttf"]
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static",
+            "buildReactNativeFromSource": true
+          }
         }
       ]
     ],
