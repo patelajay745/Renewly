@@ -2,13 +2,19 @@ import {useAppTheme} from "@/providers/ThemeProvider";
 import {useClerk} from "@clerk/clerk-expo";
 import * as Linking from "expo-linking";
 import {Text, TouchableOpacity} from "react-native";
+import {useQueryClient} from "@tanstack/react-query";
 
 export const SignOutButton = () => {
   const {colors} = useAppTheme();
   // Use `useClerk()` to access the `signOut()` function
   const {signOut} = useClerk();
+  const queryClient = useQueryClient();
+
   const handleSignOut = async () => {
     try {
+      // Clear all cached queries
+      queryClient.clear();
+
       await signOut();
       // Redirect to your desired page
       Linking.openURL(Linking.createURL("/"));

@@ -2,17 +2,16 @@ import {Redirect, Tabs} from "expo-router";
 import {HomeIcon, Plus, History, Settings} from "lucide-react-native";
 import {Pressable, View, StyleSheet, Platform} from "react-native";
 import {useAppTheme} from "@/providers/ThemeProvider";
-import {useUser} from "@clerk/clerk-expo";
+import {useAuth} from "@clerk/clerk-expo";
 import {Text} from "@/components/text";
 import {identifyDevice} from "vexo-analytics";
 
 export default function Layout() {
-  const {isSignedIn, user} = useUser();
+  const {isSignedIn} = useAuth();
 
-  if (!isSignedIn) return <Redirect href={"/sign-in"} />;
-
-  if (user) {
-    identifyDevice(user.emailAddresses[0].emailAddress);
+  // Redirect to auth if not signed in
+  if (!isSignedIn) {
+    return <Redirect href="/(auth)/sign-in" />;
   }
 
   return (

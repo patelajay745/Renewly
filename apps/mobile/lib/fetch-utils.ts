@@ -2,7 +2,12 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL + "/v1";
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL
+  ? process.env.EXPO_PUBLIC_API_URL + "/v1"
+  : (() => {
+    console.error("❌ EXPO_PUBLIC_API_URL is not defined!");
+    throw new Error("API URL is not configured. Please check your environment variables.");
+  })();
 
 const api = axios.create({
   baseURL: BASE_URL,

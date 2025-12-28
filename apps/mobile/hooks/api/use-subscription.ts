@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "./useApi";
 import { SubscriptionFormData } from "@/app/(home)/create-subscription";
 import { RecentSubscription } from "@/types/dashboard";
+import { useAuth } from "@clerk/clerk-expo";
 
 interface CreateSubscriptionData extends SubscriptionFormData {
     expoToken: string;
@@ -35,6 +36,7 @@ export const useCreateSubscription = () => {
 
 export const useAllSubscriptions = () => {
     const api = useApi();
+    const { isSignedIn } = useAuth();
 
     return useQuery<RecentSubscription[]>({
         queryKey: ["allSubscriptions"],
@@ -47,6 +49,7 @@ export const useAllSubscriptions = () => {
                 throw error;
             }
         },
+        enabled: !!isSignedIn, // Only run query if user is signed in
     });
 };
 
@@ -80,7 +83,7 @@ export const useUpdateSubscription = () => {
     return useMutation({
         mutationFn: async ({ id, data }: { id: string; data: Partial<CreateSubscriptionData> }) => {
             try {
-               
+
                 const res = await api.patch(`/subscriptions/${id}`, data);
                 return res.data;
             } catch (error) {
@@ -89,11 +92,11 @@ export const useUpdateSubscription = () => {
             }
         },
         onSuccess: async () => {
-            
-             queryClient.invalidateQueries({ queryKey: ["allSubscriptions"] });
-             queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
-             queryClient.refetchQueries({ queryKey: ["allSubscriptions"] });
-             queryClient.refetchQueries({ queryKey: ["dashboardStats"] });
+
+            queryClient.invalidateQueries({ queryKey: ["allSubscriptions"] });
+            queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
+            queryClient.refetchQueries({ queryKey: ["allSubscriptions"] });
+            queryClient.refetchQueries({ queryKey: ["dashboardStats"] });
         },
     });
 };

@@ -7,6 +7,9 @@
     },
     "android": {
       "package": "com.patel.ajay745.renewly"
+    },
+    "ios": {
+      "bundleIdentifier": "com.patel.ajay745.renewly"
     }
   }
 }
