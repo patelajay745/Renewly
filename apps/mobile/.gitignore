@@ -48,3 +48,6 @@ app-example
 /ios
 /android
 
+google-services.json
+renewly-firebase.json
+
