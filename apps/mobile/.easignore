@@ -22,7 +22,6 @@ _.key
 \*.mobileprovision
 yarn.lock
 package-lock.json
-renewly-firebase.json
 
 # Metro
 
@@ -45,11 +44,12 @@ yarn-error.\*
 
 # typescript
 
-*.tsbuildinfo
+\*.tsbuildinfo
 
 app-example
 
 # Include google-services.json in EAS builds (even though it's in .gitignore)
+
 !google-services.json
 
 # generated native folders

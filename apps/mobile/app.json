@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.subscription.Renewly",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -19,6 +19,7 @@
       }
     },
     "android": {
+      "icon": "./assets/android-icon.png",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE"
       },

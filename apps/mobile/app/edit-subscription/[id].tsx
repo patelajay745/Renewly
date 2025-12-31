@@ -1,9 +1,7 @@
 import CustomPicker, {PickerOption} from "@/components/custom-picker";
 import {Text} from "@/components/text";
 import {TextInput} from "@/components/text-input";
-import {
-  useUpdateSubscription,
-} from "@/hooks/api/use-subscription";
+import {useUpdateSubscription} from "@/hooks/api/use-subscription";
 import {getExpoNotificationToken} from "@/lib/expo-notification-token";
 import {useAppTheme} from "@/providers/ThemeProvider";
 import {subscriptionSchema} from "@/schemas/create-subscription";
@@ -26,6 +24,7 @@ import z from "zod";
 import {categoryOptions, typeOptions} from "../(home)/create-subscription";
 import DatePicker from "@/components/date-picker";
 import Loader from "@/components/loader";
+import * as Notifications from "expo-notifications";
 
 interface Props {}
 
@@ -50,16 +49,19 @@ const EditSubscription: FC<Props> = (props) => {
   const {mutate, isPending, isSuccess} = useUpdateSubscription();
 
   useEffect(() => {
-    const initializeNotifications = async () => {
-      const result = await getExpoNotificationToken();
+    const checkNotificationPermission = async () => {
+      const {status} = await Notifications.getPermissionsAsync();
+      setnotificationPermissionGranted(status === "granted");
 
-      if (result) {
-        setExpoPushToken(result.token);
-        setnotificationPermissionGranted(result.notificationGranted);
+      if (status === "granted") {
+        const result = await getExpoNotificationToken();
+        if (result) {
+          setExpoPushToken(result.token);
+        }
       }
     };
 
-    initializeNotifications();
+    checkNotificationPermission();
   }, []);
 
   const {
@@ -85,7 +87,10 @@ const EditSubscription: FC<Props> = (props) => {
 
     const dataTobeSubmitted = {
       ...data,
-      expoToken: expoPushToken || subscription?.expoToken || "",
+      expoToken:
+        data.notification && expoPushToken
+          ? expoPushToken
+          : subscription?.expoToken || "",
     };
 
     mutate(
@@ -124,7 +129,7 @@ const EditSubscription: FC<Props> = (props) => {
         category: subscription.category,
         startDate: new Date(subscription.startDate),
       });
-      
+
       setAmountDisplayValue(
         subscription.amount === 0 ? "" : subscription.amount.toString()
       );
@@ -340,26 +345,37 @@ const EditSubscription: FC<Props> = (props) => {
                 render={({field: {onChange, onBlur, value}}) => (
                   <Switch
                     value={value}
-                    onValueChange={(newValue) => {
+                    onValueChange={async (newValue) => {
                       if (newValue && !notificationPermissionGranted) {
-                        setNotificationError(
-                          "Notification permission is required"
-                        );
+                        
                         Alert.alert(
-                          "Permission Required",
-                          "Please enable notification permissions in your device settings to use this feature.",
+                          "Enable Notifications",
+                          "Renewly would like to send you notifications to remind you about upcoming subscription renewals. This is optional and you can change this anytime.",
                           [
                             {
-                              text: "Cancel",
+                              text: "Not Now",
                               style: "cancel",
+                              onPress: () => {
+                                onChange(false);
+                              },
                             },
                             {
-                              text: "Open Settings",
-                              onPress: () => {
-                                if (Platform.OS === "ios") {
-                                  Linking.openURL("app-settings:");
+                              text: "Allow",
+                              onPress: async () => {
+                                const result = await getExpoNotificationToken();
+                                if (result && result.notificationGranted) {
+                                  setExpoPushToken(result.token);
+                                  setnotificationPermissionGranted(true);
+                                  setNotificationError("");
+                                  onChange(true);
                                 } else {
-                                  Linking.openSettings();
+                                  
+                                  Alert.alert(
+                                    "Permission Denied",
+                                    "You can enable notifications later in your device settings.",
+                                    [{text: "OK"}]
+                                  );
+                                  onChange(false);
                                 }
                               },
                             },
@@ -367,6 +383,8 @@ const EditSubscription: FC<Props> = (props) => {
                         );
                         return;
                       }
+
+                      
                       setNotificationError("");
                       onChange(newValue);
                     }}

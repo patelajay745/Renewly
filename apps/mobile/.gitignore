@@ -19,7 +19,7 @@ expo-env.d.ts
 *.mobileprovision
 yarn.lock
 package-lock.json
-renewly-firebase.json
+# renewly-firebase.json
 
 # Metro
 .metro-health-check*
@@ -35,6 +35,9 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env.production
+.env.development
+.env
 
 # typescript
 *.tsbuildinfo
@@ -44,4 +47,7 @@ app-example
 # generated native folders
 /ios
 /android
+
 google-services.json
+renewly-firebase.json
+

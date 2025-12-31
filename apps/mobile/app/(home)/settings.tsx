@@ -20,6 +20,7 @@ import {Ionicons} from "@expo/vector-icons";
 import {router} from "expo-router";
 import {Text} from "@/components/text";
 import {useDeleteAccount} from "@/hooks/api/use-account";
+import {useQueryClient} from "@tanstack/react-query";
 
 interface Props {}
 
@@ -91,6 +92,7 @@ const Settings: FC<Props> = (props) => {
   const {selectedCurrency, setSelectedCurrency, currencies} = useCurrency();
   const {signOut} = useClerk();
   const {user} = useUser();
+  const queryClient = useQueryClient();
   const [isDeleting, setIsDeleting] = useState(false);
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
 
@@ -107,6 +109,9 @@ const Settings: FC<Props> = (props) => {
         style: "destructive",
         onPress: async () => {
           try {
+            // Clear all cached queries
+            queryClient.clear();
+
             await signOut();
             router.replace("/(auth)/sign-in");
           } catch (err) {
@@ -233,7 +238,6 @@ const Settings: FC<Props> = (props) => {
           />
         </View>
 
-        
         <SectionHeader title="Legal" colors={colors} />
         <View style={styles.section}>
           <SettingItem

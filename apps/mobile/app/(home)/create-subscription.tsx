@@ -24,6 +24,7 @@ import {Check} from "lucide-react-native";
 import Loader from "@/components/loader";
 import {useRouter} from "expo-router";
 import {getExpoNotificationToken} from "@/lib/expo-notification-token";
+import * as Notifications from "expo-notifications";
 
 interface Props {}
 
@@ -78,23 +79,21 @@ const CreateSubscription: FC<Props> = (props) => {
   });
 
   useEffect(() => {
-    const initializeNotifications = async () => {
-      const result = await getExpoNotificationToken();
-      if (result) {
-        setExpoPushToken(result.token);
-        setNotificationGranted(result.notificationGranted);
-      }
+    const checkNotificationPermission = async () => {
+      const {status} = await Notifications.getPermissionsAsync();
+      setNotificationGranted(status === "granted");
     };
 
-    initializeNotifications();
+    checkNotificationPermission();
   }, []);
 
   let token: string;
 
   const onSubmit = (data: SubscriptionFormData) => {
-    if (!expoPushToken) return;
-
-    const dataTobeSubmitted = {...data, expoToken: expoPushToken};
+    const dataTobeSubmitted = {
+      ...data,
+      expoToken: data.notification && expoPushToken ? expoPushToken : "",
+    };
 
     mutate(dataTobeSubmitted, {
       onSuccess: () => {
@@ -307,26 +306,35 @@ const CreateSubscription: FC<Props> = (props) => {
                 render={({field: {onChange, onBlur, value}}) => (
                   <Switch
                     value={value}
-                    onValueChange={(newValue) => {
+                    onValueChange={async (newValue) => {
                       if (newValue && !notificationGranted) {
-                        setNotificationError(
-                          "Notification permission is required"
-                        );
                         Alert.alert(
-                          "Permission Required",
-                          "Please enable notification permissions in your device settings to use this feature.",
+                          "Enable Notifications",
+                          "Renewly would like to send you notifications to remind you about upcoming subscription renewals. This is optional and you can change this anytime.",
                           [
                             {
-                              text: "Cancel",
+                              text: "Not Now",
                               style: "cancel",
+                              onPress: () => {
+                                onChange(false);
+                              },
                             },
                             {
-                              text: "Open Settings",
-                              onPress: () => {
-                                if (Platform.OS === "ios") {
-                                  Linking.openURL("app-settings:");
+                              text: "Allow",
+                              onPress: async () => {
+                                const result = await getExpoNotificationToken();
+                                if (result && result.notificationGranted) {
+                                  setExpoPushToken(result.token);
+                                  setNotificationGranted(true);
+                                  setNotificationError("");
+                                  onChange(true);
                                 } else {
-                                  Linking.openSettings();
+                                  Alert.alert(
+                                    "Permission Denied",
+                                    "You can enable notifications later in your device settings.",
+                                    [{text: "OK"}]
+                                  );
+                                  onChange(false);
                                 }
                               },
                             },
@@ -334,6 +342,7 @@ const CreateSubscription: FC<Props> = (props) => {
                         );
                         return;
                       }
+
                       setNotificationError("");
                       onChange(newValue);
                     }}

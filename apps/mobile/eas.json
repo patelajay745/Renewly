@@ -6,16 +6,41 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsucmVuZXdseS5jYyQ",
+        "EXPO_PUBLIC_VEXO": "5c33f42d-3739-40a2-aa2b-aefe23a587ed",
+        "EXPO_PUBLIC_API_URL": "https://api.renewly.cc",
+        "EXPO_PUBLIC_PROJECTID": "fbcc7bf8-0756-49dd-9297-a692d92add79",
+        "EXPO_NO_CAPABILITY_SYNC": "1"
+      }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsucmVuZXdseS5jYyQ",
+        "EXPO_PUBLIC_VEXO": "5c33f42d-3739-40a2-aa2b-aefe23a587ed",
+        "EXPO_PUBLIC_API_URL": "https://api.renewly.cc",
+        "EXPO_PUBLIC_PROJECTID": "fbcc7bf8-0756-49dd-9297-a692d92add79",
+        "EXPO_NO_CAPABILITY_SYNC": "1"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsucmVuZXdseS5jYyQ",
+        "EXPO_PUBLIC_VEXO": "5c33f42d-3739-40a2-aa2b-aefe23a587ed",
+        "EXPO_PUBLIC_API_URL": "https://api.renewly.cc",
+        "EXPO_PUBLIC_PROJECTID": "fbcc7bf8-0756-49dd-9297-a692d92add79",
+        "EXPO_NO_CAPABILITY_SYNC": "1"
+      }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "ascAppId": "6756797070"
+      }
+    }
   }
 }

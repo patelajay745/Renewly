@@ -8,12 +8,11 @@ import {useFonts} from "expo-font";
 import {useEffect} from "react";
 import * as SplashScreen from "expo-splash-screen";
 import {GestureHandlerRootView} from "react-native-gesture-handler";
-import {identifyDevice, vexo} from "vexo-analytics";
-import * as Linking from "expo-linking";
+
 import * as Notifications from "expo-notifications";
 
 export const queryClient = new QueryClient();
-if (!__DEV__) vexo(process.env.EXPO_PUBLIC_VEXO!);
+// if (!__DEV__) vexo(process.env.EXPO_PUBLIC_VEXO!);
 
 SplashScreen.preventAutoHideAsync();
 
@@ -41,17 +40,17 @@ export default function RootLayout() {
     return null;
   }
 
-  const linking = {
-    prefixes: [Linking.createURL("/"), "renewly://", "exp+renewly://"],
-  };
+  // Validate required environment variables
+  const clerkKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  if (!clerkKey) {
+    console.error("❌ Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY");
+    throw new Error("Clerk publishable key is not configured");
+  }
 
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <QueryClientProvider client={queryClient}>
-        <ClerkProvider
-          tokenCache={tokenCache}
-          publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!}
-        >
+        <ClerkProvider tokenCache={tokenCache} publishableKey={clerkKey}>
           <ThemeProvider>
             <CurrencyProvider>
               <Stack screenOptions={{headerShown: false}}>
