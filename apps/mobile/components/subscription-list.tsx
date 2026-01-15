@@ -1,11 +1,13 @@
 import {RecentSubscription} from "@/types/dashboard";
-import {FC} from "react";
+import {FC, useMemo} from "react";
 import {View, StyleSheet, FlatList} from "react-native";
 import {NextPayment} from "@/types/dashboard";
 import {useAppTheme} from "@/providers/ThemeProvider";
 import {Text} from "./text";
 import PaymentItemCard from "./payment-item-card";
 import Animated, {Easing, SlideInDown} from "react-native-reanimated";
+import {BannerAd, BannerAdSize, TestIds} from "react-native-google-mobile-ads";
+import {BANNER_AD_UNIT_ID} from "@/constants/ads";
 
 interface Props {
   data: (RecentSubscription | NextPayment)[];
@@ -16,6 +18,23 @@ const SubscriptionList: FC<Props> = ({data, title}) => {
   const {colors} = useAppTheme();
   const delayTime = title.includes("Recent") ? 200 : 100;
 
+  const listDataWithAds = useMemo(() => {
+    if (!data.length) return [];
+
+    const result: ((typeof data)[0] | {isAd: true})[] = [];
+
+    data.forEach((item, index) => {
+      result.push(item);
+
+    });
+
+    if (data.length > 0) {
+      result.push({isAd: true});
+    }
+
+    return result;
+  }, [data]);
+
   return (
     <Animated.View
       style={[styles.card, {backgroundColor: colors.card}]}
@@ -25,7 +44,7 @@ const SubscriptionList: FC<Props> = ({data, title}) => {
     >
       <Text style={[styles.title]}>{title}</Text>
 
-      {!data.length ? (
+      {!listDataWithAds.length ? (
         <View style={styles.emptyState}>
           <Text style={[styles.emptyText, {color: colors.textMuted}]}>
             No subscriptions found
@@ -33,12 +52,25 @@ const SubscriptionList: FC<Props> = ({data, title}) => {
         </View>
       ) : (
         <FlatList
-          data={data}
-          keyExtractor={(item) => item.id}
+          data={listDataWithAds}
+          keyExtractor={(item, index) =>
+            "isAd" in item ? `ad-${index}` : item.id
+          }
           scrollEnabled={false}
-          renderItem={({item, index}) => (
-            <PaymentItemCard {...item} index={index} />
-          )}
+          renderItem={({item, index}) => {
+            if ("isAd" in item) {
+              return (
+                <View style={styles.adContainer}>
+                  <BannerAd
+                    unitId={BANNER_AD_UNIT_ID}
+                    size={BannerAdSize.BANNER}
+                    
+                  />
+                </View>
+              );
+            }
+            return <PaymentItemCard {...item} index={index} />;
+          }}
           ItemSeparatorComponent={() => (
             <View
               style={[styles.separator, {backgroundColor: colors.borderMuted}]}
@@ -55,6 +87,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginTop: 14,
+    flexGrow:1
   },
   title: {
     fontSize: 20,
@@ -93,6 +126,12 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 15,
     fontWeight: "400",
+  },
+  adContainer: {
+    alignItems: "center",
+    marginVertical: 8,
+    width: "100%",
+    overflow: "hidden",
   },
 });
 

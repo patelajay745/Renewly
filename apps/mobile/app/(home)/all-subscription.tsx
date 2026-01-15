@@ -2,6 +2,7 @@ import Header from "@/components/header";
 import SubscriptionCard from "@/components/subscriptioncard";
 import {Text} from "@/components/text";
 import {TextInput} from "@/components/text-input";
+import {BANNER_AD_UNIT_ID} from "@/constants/ads";
 import {useAllSubscriptions} from "@/hooks/api/use-subscription";
 import {useAppTheme} from "@/providers/ThemeProvider";
 import {Ionicons} from "@expo/vector-icons";
@@ -23,6 +24,8 @@ import {
   FlatList,
   TouchableOpacity,
 } from "react-native";
+import {BannerAd, BannerAdSize, TestIds} from "react-native-google-mobile-ads";
+
 import Animated, {
   SlideInDown,
   SlideInUp,
@@ -96,6 +99,20 @@ const AllSubscription: FC<Props> = (props) => {
       return matchesSearch && matchesCategory;
     });
   }, [allSubscriptions, searchQuery, selectedCategory]);
+
+  const listDataWithAds = useMemo(() => {
+    if (!filteredSubscriptions) return [];
+
+    const result: ((typeof filteredSubscriptions)[0] | {isAd: true})[] = [];
+    filteredSubscriptions.forEach((item, index) => {
+      result.push(item);
+      // // Insert ad after every 5 items
+      if ((index + 1) % 5 === 0 && index < filteredSubscriptions.length - 1) {
+        result.push({isAd: true} as any);
+      }
+    });
+    return result;
+  }, [filteredSubscriptions]);
 
   return (
     <View style={[styles.container, {backgroundColor: colors.background}]}>
@@ -192,18 +209,32 @@ const AllSubscription: FC<Props> = (props) => {
         </View>
       ) : (
         <Animated.FlatList
-          data={filteredSubscriptions}
-          keyExtractor={(item) => item.id}
-          renderItem={({item, index}) => (
-            <Animated.View
-              entering={SlideInDown.duration(400)
-                .delay(index * 100)
-                .springify()}
-              layout={Layout.springify()}
-            >
-              <SubscriptionCard {...item} />
-            </Animated.View>
-          )}
+          data={listDataWithAds}
+          keyExtractor={(item, index) =>
+            "isAd" in item ? `ad-${index}` : item.id
+          }
+          renderItem={({item, index}) => {
+            if ("isAd" in item) {
+              return (
+                <View style={styles.adContainer}>
+                  <BannerAd
+                    unitId={BANNER_AD_UNIT_ID}
+                    size={BannerAdSize.BANNER}
+                  />
+                </View>
+              );
+            }
+            return (
+              <Animated.View
+                entering={SlideInDown.duration(400)
+                  .delay(index * 100)
+                  .springify()}
+                layout={Layout.springify()}
+              >
+                <SubscriptionCard {...item} />
+              </Animated.View>
+            );
+          }}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           onRefresh={refetch}
@@ -225,7 +256,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   container: {flex: 1},
-  listContent: {gap: 10, paddingHorizontal: 16, paddingBottom: 16},
+  listContent: {
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingBottom: 120,
+  },
   instructionBanner: {
     flexDirection: "row",
     alignItems: "center",
@@ -291,6 +326,10 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 14,
+  },
+  adContainer: {
+    alignItems: "center",
+    marginVertical: 8,
   },
 });
 

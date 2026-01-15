@@ -72,7 +72,7 @@ export default function Page() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
         ListHeaderComponent={() => (
-          <>
+          <View >
             <Text style={[styles.heading, {color: colors.text}]}>
               Welcome, {user?.firstName}
             </Text>
@@ -81,7 +81,7 @@ export default function Page() {
               data={data.nextPayments}
               title="Upcoming Payments"
             />
-          </>
+          </View>
         )}
         onRefresh={refetch}
         refreshing={isLoading}
@@ -105,7 +105,8 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom: Platform.OS === "ios" ? 120 : 120,
+    paddingBottom:  120,
+   
   },
   heading: {
     fontSize: 28,

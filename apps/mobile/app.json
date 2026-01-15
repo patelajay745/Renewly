@@ -2,7 +2,7 @@
   "expo": {
     "name": "Renewly",
     "slug": "Renewly",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "renewly",
@@ -83,5 +83,9 @@
       }
     },
     "owner": "patel.ajay745"
+  },
+  "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-6236869979264488~5836269621",
+    "ios_app_id": "ca-app-pub-6236869979264488~3325608629"
   }
 }

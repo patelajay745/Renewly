@@ -4,15 +4,54 @@ import {Pressable, View, StyleSheet, Platform} from "react-native";
 import {useAppTheme} from "@/providers/ThemeProvider";
 import {useAuth} from "@clerk/clerk-expo";
 import {Text} from "@/components/text";
+import {NativeTabs, Icon, Label} from "expo-router/unstable-native-tabs";
 
-
+const isLiquidGlassSupported= Number(Platform.Version) >=26
 
 export default function Layout() {
   const {isSignedIn} = useAuth();
+   const {colors} = useAppTheme();
 
   // Redirect to auth if not signed in
   if (!isSignedIn) {
     return <Redirect href="/(auth)/sign-in" />;
+  }
+
+  if(isLiquidGlassSupported){
+    return  <NativeTabs minimizeBehavior="automatic">
+        <NativeTabs.Trigger name="index">
+          <Label>Home</Label>
+          <Icon
+            sf="house.fill"
+            drawable="custom_android_drawable"
+            selectedColor={colors.primary}
+          />
+        </NativeTabs.Trigger>
+        <NativeTabs.Trigger name="create-subscription">
+          <Label>Create</Label>
+          <Icon
+            sf="plus.app.fill"
+            drawable="custom_android_drawable"
+            selectedColor={colors.primary}
+          />
+        </NativeTabs.Trigger>
+        <NativeTabs.Trigger name="all-subscription">
+          <Icon
+            sf="receipt"
+            drawable="custom_settings_drawable"
+            selectedColor={colors.primary}
+          />
+          <Label>Subscriptions</Label>
+        </NativeTabs.Trigger>
+        <NativeTabs.Trigger name="settings">
+          <Icon
+            sf="gear"
+            drawable="custom_settings_drawable"
+            selectedColor={colors.primary}
+          />
+          <Label>Settings</Label>
+        </NativeTabs.Trigger>
+      </NativeTabs>
   }
 
   return (
