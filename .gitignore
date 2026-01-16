@@ -43,4 +43,10 @@ mobile/google-services.json
 */node_modules
 */ios
 */android
+*/build*
 
+
+# Sensitive files
+mobile/renewly-firebase.json
+mobile/*.aab
+mobile/*.apk
