@@ -39,3 +39,8 @@ yarn-error.log*
 mobile/.env.production
 mobile/google-services.json
 
+*/.env*
+*/node_modules
+*/ios
+*/android
+
